@@ -1,0 +1,6 @@
+[
+  {
+    "type": "sqlite",
+    "path": "/home/samuel/Programmieren/signal-stats/database.sqlite"
+  }
+]
