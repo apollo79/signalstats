@@ -1,16 +1,18 @@
-import { type Component, createResource, Show } from "solid-js";
+import { type Component, createEffect, createResource, Show } from "solid-js";
 import type { RouteSectionProps } from "@solidjs/router";
 
-import { overallSentMessagesQuery, SELF_ID, threadOverviewQuery } from "~/db";
+import { allThreadsOverviewQuery, overallSentMessagesQuery, SELF_ID } from "~/db";
 
 import { OverviewTable, type RoomOverview } from "./overview-table";
 
 export const Overview: Component<RouteSectionProps> = () => {
-  const [allSelfSentMessagesCount] = createResource(() => overallSentMessagesQuery(SELF_ID).executeTakeFirstOrThrow());
+  const [allSelfSentMessagesCount] = createResource(() => overallSentMessagesQuery(SELF_ID));
 
   const [roomOverview] = createResource<RoomOverview[]>(async () => {
-    return (await threadOverviewQuery.execute()).map((row) => {
+    return (await allThreadsOverviewQuery()).rows.map((row) => {
       const isGroup = row.title !== null;
+
+      console.log(row);
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const name = (
@@ -33,13 +35,18 @@ export const Overview: Component<RouteSectionProps> = () => {
     });
   });
 
+  createEffect(() => {
+    console.log(roomOverview());
+  });
+
   return (
     <div>
-      <p>All messages: {allSelfSentMessagesCount()?.message_count as number}</p>
+      <p>All messages: {allSelfSentMessagesCount()?.messageCount as number}</p>
       <Show
         when={!roomOverview.loading}
         fallback="Loading..."
       >
+        {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
         <OverviewTable data={roomOverview()!} />;
       </Show>
     </div>

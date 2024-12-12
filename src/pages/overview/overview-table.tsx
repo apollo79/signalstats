@@ -1,4 +1,5 @@
 import { type Component, createSignal, For, Match, Show, Switch } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 
 import {
   type ColumnFiltersState,
@@ -37,7 +38,7 @@ export interface RoomOverview {
 
 const columnHelper = createColumnHelper<RoomOverview>();
 
-const archivedFilterFn: FilterFn<RoomOverview> = (row, columnId, filterValue) => {
+const archivedFilterFn: FilterFn<RoomOverview> = (row, _columnId, filterValue) => {
   if (filterValue === true) {
     return true;
   }
@@ -241,6 +242,8 @@ export const OverviewTable = (props: OverviewTableProps) => {
     },
   });
 
+  const navigate = useNavigate();
+
   return (
     <div>
       <div class="flex flex-row items-center gap-x-4">
@@ -304,8 +307,14 @@ export const OverviewTable = (props: OverviewTableProps) => {
             <For each={table.getRowModel().rows}>
               {(row) => (
                 <TableRow
-                  class="[&:last-of-type>td:first-of-type]:rounded-bl-md [&:last-of-type>td:last-of-type]:rounded-br-md"
+                  class="cursor-pointer [&:last-of-type>td:first-of-type]:rounded-bl-md [&:last-of-type>td:last-of-type]:rounded-br-md"
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => {
+                    const threadId = row.original.threadId;
+                    const isGroup = row.original.isGroup;
+
+                    navigate(`/${isGroup ? "group" : "dm"}/${threadId.toString()}`);
+                  }}
                 >
                   <For each={row.getVisibleCells()}>
                     {(cell) => (

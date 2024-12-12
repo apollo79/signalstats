@@ -26,6 +26,12 @@ importers:
       chart.js:
         specifier: ^4.4.7
         version: 4.4.7
+      chartjs-plugin-deferred:
+        specifier: ^2.0.0
+        version: 2.0.0(chart.js@4.4.7)
+      chartjs-plugin-zoom:
+        specifier: ^2.2.0
+        version: 2.2.0(chart.js@4.4.7)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -672,6 +678,9 @@ packages:
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
+  '@types/hammerjs@2.0.46':
+    resolution: {integrity: sha512-ynRvcq6wvqexJ9brDMS4BnBLzmr0e14d6ZJTEShTBWKymQiHwlAyGu0ZPEFI2Fh1U53F7tN9ufClWM5KvqkKOw==}
+
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
@@ -865,6 +874,16 @@ packages:
   chart.js@4.4.7:
     resolution: {integrity: sha512-pwkcKfdzTMAU/+jNosKhNL2bHtJc/sSmYgVbuGTEDhzkrhmyihmP7vUc/5ZK9WopidMDHNe3Wm7jOd/WhuHWuw==}
     engines: {pnpm: '>=8'}
+
+  chartjs-plugin-deferred@2.0.0:
+    resolution: {integrity: sha512-jq6b8Wt23WS6zxiX8oVB1MXq4uaJX2KGTyiqnq6xo4ctZPgFkT/FuIEKpJjsF1WkYv7ZQrqrrRg1fLw6O5ZEfQ==}
+    peerDependencies:
+      chart.js: '>= 3.0.0'
+
+  chartjs-plugin-zoom@2.2.0:
+    resolution: {integrity: sha512-in6kcdiTlP6npIVLMd4zXZ08PDUXC52gZ4FAy5oyjk1zX3gKarXMAof7B9eFiisf9WOC3bh2saHg+J5WtLXZeA==}
+    peerDependencies:
+      chart.js: '>=3.2.0'
 
   chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
@@ -1172,6 +1191,10 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  hammerjs@2.0.8:
+    resolution: {integrity: sha512-tSQXBXS/MWQOn/RKckawJ61vvsDpCom87JgxiYdGwHdOa0ht0vzUWDlfioofFCRU0L+6NGDt6XzbgoJvZkMeRQ==}
+    engines: {node: '>=0.8.0'}
 
   has-flag@3.0.0:
     resolution: {integrity: sha512-sKJf1+ceQBr4SMkvQnBDNDtf4TXpVhVGateu0t918bl30FnbE2m4vNLX+VWe/dpjlb+HugGYzW7uQXH98HPEYw==}
@@ -2470,6 +2493,8 @@ snapshots:
 
   '@types/estree@1.0.6': {}
 
+  '@types/hammerjs@2.0.46': {}
+
   '@types/json-schema@7.0.15': {}
 
   '@types/node@22.10.1':
@@ -2692,6 +2717,16 @@ snapshots:
   chart.js@4.4.7:
     dependencies:
       '@kurkle/color': 0.3.4
+
+  chartjs-plugin-deferred@2.0.0(chart.js@4.4.7):
+    dependencies:
+      chart.js: 4.4.7
+
+  chartjs-plugin-zoom@2.2.0(chart.js@4.4.7):
+    dependencies:
+      '@types/hammerjs': 2.0.46
+      chart.js: 4.4.7
+      hammerjs: 2.0.8
 
   chokidar@3.6.0:
     dependencies:
@@ -3017,6 +3052,8 @@ snapshots:
   globals@14.0.0: {}
 
   graphemer@1.4.0: {}
+
+  hammerjs@2.0.8: {}
 
   has-flag@3.0.0: {}
 

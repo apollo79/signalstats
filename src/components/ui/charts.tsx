@@ -36,6 +36,10 @@ import {
   ScatterController,
   Tooltip,
 } from "chart.js";
+import ChartDeferred from "chartjs-plugin-deferred";
+import ChartZoom from "chartjs-plugin-zoom";
+
+Chart.register(ChartDeferred, ChartZoom);
 
 interface TypedChartProps {
   data: ChartData;

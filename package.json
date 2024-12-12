@@ -42,6 +42,8 @@
     "@solidjs/router": "^0.15.1",
     "@tanstack/solid-table": "^8.20.5",
     "chart.js": "^4.4.7",
+    "chartjs-plugin-deferred": "^2.0.0",
+    "chartjs-plugin-zoom": "^2.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

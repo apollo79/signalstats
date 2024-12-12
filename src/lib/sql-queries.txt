@@ -28,17 +28,3 @@ WHERE
   r._id = 4
   AND message.body IS NOT NULL
   AND message.body != ''`;
-
-// select all chats / groups with details
-`SELECT
-  thread.recipient_id,
-  thread.active,
-  recipient.profile_joined_name,
-  recipient.system_joined_name,
-  groups.title
-FROM
-  thread
-  JOIN recipient ON thread.recipient_id = recipient._id
-  LEFT JOIN groups ON recipient._id = groups.recipient_id
-WHERE (SELECT 1 FROM message WHERE message.thread_id = thread._id AND message.body IS NOT NULL)
-`;

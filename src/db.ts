@@ -1,11 +1,12 @@
 import { type Accessor, createMemo, createSignal, DEV, type Setter } from "solid-js";
 
-import { Kysely, type NotNull } from "kysely";
+import { Kysely, type NotNull, sql } from "kysely";
 import type { DB } from "kysely-codegen";
 import { SqlJsDialect } from "kysely-wasm";
 import initSqlJS, { type Database } from "sql.js";
 
 import wasmURL from "./assets/sql-wasm.wasm?url";
+import { cached } from "./lib/db-cache";
 
 export const SELF_ID = 2;
 
@@ -13,7 +14,8 @@ export const SQL = await initSqlJS({
   locateFile: () => wasmURL,
 });
 
-let rawDb: Accessor<Database | undefined>, setRawDb: Setter<Database | undefined>;
+let rawDb: Accessor<Database | undefined> = () => undefined,
+  setRawDb: Setter<Database | undefined> = () => undefined;
 
 if (DEV) {
   const file = await import("./assets/database.sqlite?url").then((result) => {
@@ -22,9 +24,9 @@ if (DEV) {
 
   const testDb = new SQL.Database(new Uint8Array(file));
 
-  [rawDb, setRawDb] = createSignal<Database>(testDb);
+  [rawDb, setRawDb] = createSignal<Database | undefined>(testDb);
 } else {
-  [rawDb, setRawDb] = createSignal<Database>();
+  [rawDb, setRawDb] = createSignal<Database | undefined>();
 }
 
 export { rawDb as db, setRawDb as setDb };
@@ -51,13 +53,13 @@ const kyselyDb = createMemo(() => {
   });
 });
 
-export const threadOverviewQuery = kyselyDb()
+const allThreadsOverviewQueryRaw = kyselyDb()
   .selectFrom("thread")
   .innerJoin(
     (eb) =>
       eb
         .selectFrom("message")
-        .select(["thread_id", kyselyDb().fn.countAll().as("message_count")])
+        .select((eb) => ["message.thread_id", eb.fn.countAll().as("message_count")])
         .where((eb) => {
           return eb.and([eb("message.body", "is not", null), eb("message.body", "is not", "")]);
         })
@@ -82,18 +84,67 @@ export const threadOverviewQuery = kyselyDb()
     thread_id: NotNull;
     archived: NotNull;
     message_count: number;
-  }>();
+  }>()
+  .compile();
 
-console.log(threadOverviewQuery.compile());
+export const allThreadsOverviewQuery = cached(() => kyselyDb().executeQuery(allThreadsOverviewQueryRaw));
 
-export const overallSentMessagesQuery = (recipientId: number) =>
+const overallSentMessagesQueryRaw = (recipientId: number) =>
   kyselyDb()
     .selectFrom("message")
-    .select(kyselyDb().fn.countAll().as("message_count"))
+    .select((eb) => eb.fn.countAll().as("messageCount"))
     .where((eb) =>
       eb.and([
         eb("message.from_recipient_id", "=", recipientId),
         eb("message.body", "is not", null),
         eb("message.body", "!=", ""),
       ]),
-    );
+    )
+    .executeTakeFirst();
+
+export const overallSentMessagesQuery = cached(overallSentMessagesQueryRaw);
+
+const dmPartnerRecipientQueryRaw = (dmId: number) =>
+  kyselyDb()
+    .selectFrom("recipient")
+    .select(["recipient._id", "recipient.system_joined_name", "recipient.profile_joined_name"])
+    .innerJoin("thread", "recipient._id", "thread.recipient_id")
+    .where((eb) => eb.and([eb("thread._id", "=", dmId), eb("recipient._id", "!=", SELF_ID)]))
+    .$narrowType<{
+      _id: number;
+    }>()
+    .executeTakeFirst();
+
+export const dmPartnerRecipientQuery = cached(dmPartnerRecipientQueryRaw);
+
+const dmOverviewQueryRaw = (dmId: number) =>
+  kyselyDb()
+    .selectFrom("message")
+    .select((eb) => [
+      sql<Date>`DATE(datetime(message.date_sent / 1000, 'unixepoch'))`.as("message_date"),
+      eb.fn.countAll().as("message_count"),
+    ])
+    .groupBy("message_date")
+    .orderBy("message_date asc")
+    .where("thread_id", "=", dmId)
+    .execute();
+
+export const dmOverviewQuery = cached(dmOverviewQueryRaw);
+
+const threadSentMessagesPerPersonOverviewQueryRaw = (dmId: number) =>
+  kyselyDb()
+    .selectFrom("message")
+    .select((eb) => [
+      "from_recipient_id",
+      sql<Date>`DATE(datetime(message.date_sent / 1000, 'unixepoch'))`.as("message_date"),
+      eb.fn.countAll().as("message_count"),
+    ])
+    .groupBy(["from_recipient_id", "message_date"])
+    .orderBy(["message_date"])
+    .where((eb) => eb.and([eb("body", "is not", null), eb("body", "!=", ""), eb("thread_id", "=", dmId)]))
+    .$narrowType<{
+      message_count: number;
+    }>()
+    .execute();
+
+export const dmSentMessagesPerPersonOverviewQuery = cached(threadSentMessagesPerPersonOverviewQueryRaw);
