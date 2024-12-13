@@ -1,4 +1,4 @@
-import { type Component, createEffect, createResource, Show } from "solid-js";
+import { type Component, createResource, Show } from "solid-js";
 import type { RouteSectionProps } from "@solidjs/router";
 
 import { allThreadsOverviewQuery, overallSentMessagesQuery, SELF_ID } from "~/db";
@@ -11,8 +11,6 @@ export const Overview: Component<RouteSectionProps> = () => {
   const [roomOverview] = createResource<RoomOverview[]>(async () => {
     return (await allThreadsOverviewQuery()).rows.map((row) => {
       const isGroup = row.title !== null;
-
-      console.log(row);
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const name = (
@@ -33,10 +31,6 @@ export const Overview: Component<RouteSectionProps> = () => {
         isGroup,
       };
     });
-  });
-
-  createEffect(() => {
-    console.log(roomOverview());
   });
 
   return (

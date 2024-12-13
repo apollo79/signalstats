@@ -1,15 +1,16 @@
-import { type Accessor, type Component, createResource, Show } from "solid-js";
+import { type Accessor, type Component, createEffect, createResource, Show } from "solid-js";
 import type { RouteSectionProps } from "@solidjs/router";
 
 import { type ChartData } from "chart.js";
 
-import { LineChart } from "~/components/ui/charts";
+import { LineChart, WordCloudChart } from "~/components/ui/charts";
 
-import { dmPartnerRecipientQuery, dmSentMessagesPerPersonOverviewQuery, SELF_ID } from "~/db";
+import { dmPartnerRecipientQuery, dmSentMessagesPerPersonOverviewQuery, SELF_ID, threadMostUsedWordsQuery } from "~/db";
 
 export const DmId: Component<RouteSectionProps> = (props) => {
   const dmId = () => Number(props.params.dmid);
 
+  // the other person in the chat with name and id
   const [dmPartner] = createResource(async () => {
     const dmPartner = await dmPartnerRecipientQuery(dmId());
 
@@ -26,15 +27,17 @@ export const DmId: Component<RouteSectionProps> = (props) => {
 
   const [dmMessagesPerPerson] = createResource(() => dmSentMessagesPerPersonOverviewQuery(dmId()));
 
+  // maps all the message counts to dates
   const dmMessages = () => {
     return dmMessagesPerPerson()?.reduce<
       {
         date: Date;
         totalMessages: number;
-        [key: number]: number;
+        [recipientId: number]: number;
       }[]
     >((prev, curr) => {
       const existingDate = prev.find(({ date }) => date === curr.message_date);
+
       if (existingDate) {
         existingDate[curr.from_recipient_id] = curr.message_count;
 
@@ -50,6 +53,8 @@ export const DmId: Component<RouteSectionProps> = (props) => {
       return prev;
     }, []);
   };
+
+  const [mostUsedWordCounts] = createResource(async () => threadMostUsedWordsQuery(dmId(), 300));
 
   const recipients = () => {
     const currentDmPartner = dmPartner();
@@ -70,6 +75,31 @@ export const DmId: Component<RouteSectionProps> = (props) => {
         name: "You",
       },
     ];
+  };
+
+  const maxWordSize = 100;
+
+  const mostUsedWordChartData: Accessor<ChartData<"wordCloud"> | undefined> = () => {
+    const currentMostUsedWordCounts = mostUsedWordCounts();
+
+    if (currentMostUsedWordCounts) {
+      // ordered descending in db query
+      const highestWordCount = currentMostUsedWordCounts[0].count;
+
+      const calcWordSizeInPixels = (count: number) => {
+        return 10 + Math.round((maxWordSize / highestWordCount) * count);
+      };
+
+      return {
+        labels: currentMostUsedWordCounts.map(({ word }) => word),
+        datasets: [
+          {
+            label: "Used",
+            data: currentMostUsedWordCounts.map(({ count }) => calcWordSizeInPixels(count)),
+          },
+        ],
+      };
+    }
   };
 
   const dateChartData: Accessor<ChartData<"line"> | undefined> = () => {
@@ -108,36 +138,50 @@ export const DmId: Component<RouteSectionProps> = (props) => {
   };
 
   return (
-    <Show when={dateChartData()}>
-      {(currentDateChartData) => (
-        <div class="max-h-96">
-          <LineChart
-            options={{
-              normalized: true,
-              aspectRatio: 2,
-              plugins: {
-                zoom: {
-                  pan: {
-                    enabled: true,
-                    mode: "xy",
-                  },
+    <div>
+      <Show when={dateChartData()}>
+        {(currentDateChartData) => (
+          <div class="max-h-96">
+            <LineChart
+              options={{
+                normalized: true,
+                aspectRatio: 2,
+                plugins: {
                   zoom: {
-                    wheel: {
+                    pan: {
                       enabled: true,
+                      mode: "xy",
                     },
-                    pinch: {
-                      enabled: true,
+                    zoom: {
+                      wheel: {
+                        enabled: true,
+                      },
+                      pinch: {
+                        enabled: true,
+                      },
+                      mode: "xy",
                     },
-                    mode: "xy",
                   },
                 },
-              },
-            }}
-            data={currentDateChartData()}
-          />
-        </div>
-      )}
-    </Show>
+              }}
+              data={currentDateChartData()}
+            />
+          </div>
+        )}
+      </Show>
+      <Show when={mostUsedWordChartData()}>
+        {(currentMostUsedWordChartData) => (
+          <div class="max-w-3xl">
+            <WordCloudChart
+              options={{
+                normalized: true,
+              }}
+              data={currentMostUsedWordChartData()}
+            />
+          </div>
+        )}
+      </Show>
+    </div>
   );
 };
 

@@ -36,6 +36,7 @@ import {
   ScatterController,
   Tooltip,
 } from "chart.js";
+import { WordCloudController, WordElement } from "chartjs-chart-wordcloud";
 import ChartDeferred from "chartjs-plugin-deferred";
 import ChartZoom from "chartjs-plugin-zoom";
 
@@ -276,6 +277,7 @@ const RadarChart = /* #__PURE__ */ createTypedChart("radar", [
   RadialLinearScale,
 ]);
 const ScatterChart = /* #__PURE__ */ createTypedChart("scatter", [ScatterController, PointElement, LinearScale]);
+const WordCloudChart = /* #__PURE__ */ createTypedChart("wordCloud", [WordCloudController, WordElement]);
 
 export {
   BarChart,
@@ -287,4 +289,5 @@ export {
   PolarAreaChart,
   RadarChart,
   ScatterChart,
+  WordCloudChart,
 };

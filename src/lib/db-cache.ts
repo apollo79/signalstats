@@ -82,13 +82,13 @@ class LocalStorageCacheAdapter {
 
 const cache = new LocalStorageCacheAdapter();
 
-export const cached = <T, R, TT>(fn: (...args: T[]) => R, self?: ThisType<TT>): ((...args: T[]) => R) => {
+export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?: ThisType<TT>): ((...args: T) => R) => {
   const cacheName = hashString(fn.toString()).toString();
 
   // important to return a promise on follow-up calls even if the data is immediately available
   let isPromise: boolean;
 
-  return (...args: T[]) => {
+  return (...args: T) => {
     const cacheKey = JSON.stringify(args);
 
     const cachedValue = cache.get<R>(cacheName, cacheKey);

@@ -1,4 +1,4 @@
-import { type Accessor, createMemo, createSignal, DEV, type Setter } from "solid-js";
+import { type Accessor, createEffect, createMemo, createSignal, DEV, type Setter } from "solid-js";
 
 import { Kysely, type NotNull, sql } from "kysely";
 import type { DB } from "kysely-codegen";
@@ -40,6 +40,16 @@ const sqlJsDialect = () => {
     });
   }
 };
+
+createEffect(() => {
+  const db = rawDb();
+
+  if (db) {
+    db.create_function("is_not_empty", (str: string | null) => {
+      return str !== null && str !== "";
+    });
+  }
+});
 
 const kyselyDb = createMemo(() => {
   const currentSqlJsDialect = sqlJsDialect();
@@ -131,7 +141,7 @@ const dmOverviewQueryRaw = (dmId: number) =>
 
 export const dmOverviewQuery = cached(dmOverviewQueryRaw);
 
-const threadSentMessagesPerPersonOverviewQueryRaw = (dmId: number) =>
+const threadSentMessagesPerPersonOverviewQueryRaw = (threadId: number) =>
   kyselyDb()
     .selectFrom("message")
     .select((eb) => [
@@ -141,10 +151,43 @@ const threadSentMessagesPerPersonOverviewQueryRaw = (dmId: number) =>
     ])
     .groupBy(["from_recipient_id", "message_date"])
     .orderBy(["message_date"])
-    .where((eb) => eb.and([eb("body", "is not", null), eb("body", "!=", ""), eb("thread_id", "=", dmId)]))
+    .where((eb) => eb.and([eb("body", "is not", null), eb("body", "!=", ""), eb("thread_id", "=", threadId)]))
     .$narrowType<{
       message_count: number;
     }>()
     .execute();
 
 export const dmSentMessagesPerPersonOverviewQuery = cached(threadSentMessagesPerPersonOverviewQueryRaw);
+
+const threadMostUsedWordsQueryRaw = (threadId: number, limit = 10) =>
+  kyselyDb()
+    .withRecursive("words", (eb) => {
+      return eb
+        .selectFrom("message")
+        .select([
+          sql`LOWER(substr(body, 1, instr(body || " ", " ") - 1))`.as("word"),
+          sql`(substr(body, instr(body || " ", " ") + 1))`.as("rest"),
+        ])
+        .where((eb) => eb.and([eb("body", "is not", null), eb("thread_id", "=", threadId)]))
+        .unionAll((ebInner) => {
+          return ebInner
+            .selectFrom("words")
+            .select([
+              sql`LOWER(substr(rest, 1, instr(rest || " ", " ") - 1))`.as("word"),
+              sql`(substr(rest, instr(rest || " ", " ") + 1))`.as("rest"),
+            ])
+            .where("rest", "<>", "");
+        });
+    })
+    .selectFrom("words")
+    .select((eb) => ["word", eb.fn.countAll().as("count")])
+    .where("word", "<>", "")
+    .groupBy("word")
+    .orderBy("count desc")
+    .limit(limit)
+    .$narrowType<{
+      count: number;
+    }>()
+    .execute();
+
+export const threadMostUsedWordsQuery = cached(threadMostUsedWordsQueryRaw);

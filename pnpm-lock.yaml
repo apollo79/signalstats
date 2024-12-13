@@ -26,6 +26,9 @@ importers:
       chart.js:
         specifier: ^4.4.7
         version: 4.4.7
+      chartjs-chart-wordcloud:
+        specifier: ^4.4.4
+        version: 4.4.4(chart.js@4.4.7)
       chartjs-plugin-deferred:
         specifier: ^2.0.0
         version: 2.0.0(chart.js@4.4.7)
@@ -672,6 +675,12 @@ packages:
   '@types/babel__traverse@7.20.6':
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
 
+  '@types/d3-cloud@1.2.9':
+    resolution: {integrity: sha512-5EWJvnlCrqTThGp8lYHx+DL00sOjx2HTlXH1WRe93k5pfOIhPQaL63NttaKYIbT7bTXp/USiunjNS/N4ipttIQ==}
+
+  '@types/d3@3.5.53':
+    resolution: {integrity: sha512-8yKQA9cAS6+wGsJpBysmnhlaaxlN42Qizqkw+h2nILSlS+MAG2z4JdO6p+PJrJ+ACvimkmLJL281h157e52psQ==}
+
   '@types/emscripten@1.39.13':
     resolution: {integrity: sha512-cFq+fO/isvhvmuP/+Sl4K4jtU6E23DoivtbO4r50e3odaxAiVdbfSYRDdJ4gCdxx+3aRjhphS5ZMwIH4hFy/Cw==}
 
@@ -875,6 +884,11 @@ packages:
     resolution: {integrity: sha512-pwkcKfdzTMAU/+jNosKhNL2bHtJc/sSmYgVbuGTEDhzkrhmyihmP7vUc/5ZK9WopidMDHNe3Wm7jOd/WhuHWuw==}
     engines: {pnpm: '>=8'}
 
+  chartjs-chart-wordcloud@4.4.4:
+    resolution: {integrity: sha512-9ruQX5CjfBwpO31mYqniD3BQ9YTCHxWe52eoUl9Z3ecNQWF3OCHeDVv7lHe8ca1NBihfCgoRa3Y0eBGwBmgwcw==}
+    peerDependencies:
+      chart.js: ^4.1.0
+
   chartjs-plugin-deferred@2.0.0:
     resolution: {integrity: sha512-jq6b8Wt23WS6zxiX8oVB1MXq4uaJX2KGTyiqnq6xo4ctZPgFkT/FuIEKpJjsF1WkYv7ZQrqrrRg1fLw6O5ZEfQ==}
     peerDependencies:
@@ -933,6 +947,12 @@ packages:
 
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
+
+  d3-cloud@1.2.7:
+    resolution: {integrity: sha512-8TrgcgwRIpoZYQp7s3fGB7tATWfhckRb8KcVd1bOgqkNdkJRDGWfdSf4HkHHzZxSczwQJdSxvfPudwir5IAJ3w==}
+
+  d3-dispatch@1.0.6:
+    resolution: {integrity: sha512-fVjoElzjhCEy+Hbn8KygnmMS7Or0a9sI2UzGwoB7cCtvI1XpVN9GpoYlnb3xt2YV66oXYb1fLJ8GMvP4hdU1RA==}
 
   date-fns@4.1.0:
     resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
@@ -2489,6 +2509,12 @@ snapshots:
     dependencies:
       '@babel/types': 7.26.3
 
+  '@types/d3-cloud@1.2.9':
+    dependencies:
+      '@types/d3': 3.5.53
+
+  '@types/d3@3.5.53': {}
+
   '@types/emscripten@1.39.13': {}
 
   '@types/estree@1.0.6': {}
@@ -2718,6 +2744,12 @@ snapshots:
     dependencies:
       '@kurkle/color': 0.3.4
 
+  chartjs-chart-wordcloud@4.4.4(chart.js@4.4.7):
+    dependencies:
+      '@types/d3-cloud': 1.2.9
+      chart.js: 4.4.7
+      d3-cloud: 1.2.7
+
   chartjs-plugin-deferred@2.0.0(chart.js@4.4.7):
     dependencies:
       chart.js: 4.4.7
@@ -2775,6 +2807,12 @@ snapshots:
   cssesc@3.0.0: {}
 
   csstype@3.1.3: {}
+
+  d3-cloud@1.2.7:
+    dependencies:
+      d3-dispatch: 1.0.6
+
+  d3-dispatch@1.0.6: {}
 
   date-fns@4.1.0: {}
 
