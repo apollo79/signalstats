@@ -101,8 +101,8 @@
           "level": "error",
           "fix": "safe",
           "options": {
-            "attributes": ["className"],
-            "functions": ["cn"]
+            "attributes": ["class"],
+            "functions": ["cn", "cva"]
           }
         }
       }

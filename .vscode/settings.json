@@ -8,5 +8,8 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "typescript.inlayHints.parameterNames.enabled": "all"
 }
