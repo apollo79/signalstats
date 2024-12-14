@@ -94,8 +94,11 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
     on(
       () => props.data,
       () => {
-        chart()!.data = props.data;
-        chart()!.update();
+        const currentChart = chart();
+        if (currentChart) {
+          currentChart.data = props.data;
+          currentChart.update();
+        }
       },
       { defer: true },
     ),
@@ -105,8 +108,11 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
     on(
       () => props.options,
       () => {
-        chart()!.options = props.options;
-        chart()!.update();
+        const currentChart = chart();
+        if (currentChart) {
+          currentChart.options = props.options;
+          currentChart.update();
+        }
       },
       { defer: true },
     ),
@@ -116,7 +122,10 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
     on(
       [() => props.width, () => props.height],
       () => {
-        chart()!.resize(props.width, props.height);
+        const currentChart = chart();
+        if (currentChart) {
+          currentChart.resize(props.width, props.height);
+        }
       },
       { defer: true },
     ),
@@ -126,10 +135,13 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
     on(
       () => props.type,
       () => {
-        const dimensions = [chart()!.width, chart()!.height];
-        chart()!.destroy();
-        init();
-        chart()!.resize(...dimensions);
+        const currentChart = chart();
+        if (currentChart) {
+          const dimensions = [currentChart.width, currentChart.height];
+          currentChart.destroy();
+          init();
+          currentChart.resize(...dimensions);
+        }
       },
       { defer: true },
     ),
@@ -141,13 +153,7 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
   });
 
   Chart.register(Colors, Filler, Legend, Tooltip);
-  return (
-    <canvas
-      ref={mergeRefs(props.ref, (el) => setCanvasRef(el))}
-      height={props.height}
-      width={props.width}
-    />
-  );
+  return <canvas ref={mergeRefs(props.ref, (el) => setCanvasRef(el))} height={props.height} width={props.width} />;
 };
 
 function showTooltip(context: ChartContext) {
@@ -245,13 +251,7 @@ function createTypedChart(type: ChartType, components: ChartComponent[]): Compon
   };
 
   Chart.register(...components);
-  return (props) => (
-    <BaseChart
-      type={type}
-      options={options}
-      {...props}
-    />
-  );
+  return (props) => <BaseChart type={type} options={options} {...props} />;
 }
 
 const BarChart = /* #__PURE__ */ createTypedChart("bar", [BarController, BarElement, CategoryScale, LinearScale]);

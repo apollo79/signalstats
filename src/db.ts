@@ -90,6 +90,7 @@ const allThreadsOverviewQueryRaw = kyselyDb()
     "groups.title",
     "message_count",
     "thread.date as last_message_date",
+    "recipient.nickname_joined_name",
   ])
   .where("message_count", ">", 0)
   .$narrowType<{
@@ -119,7 +120,12 @@ export const overallSentMessagesQuery = cached(overallSentMessagesQueryRaw);
 const dmPartnerRecipientQueryRaw = (dmId: number) =>
   kyselyDb()
     .selectFrom("recipient")
-    .select(["recipient._id", "recipient.system_joined_name", "recipient.profile_joined_name"])
+    .select([
+      "recipient._id",
+      "recipient.system_joined_name",
+      "recipient.profile_joined_name",
+      "recipient.nickname_joined_name",
+    ])
     .innerJoin("thread", "recipient._id", "thread.recipient_id")
     .where((eb) => eb.and([eb("thread._id", "=", dmId), eb("recipient._id", "!=", SELF_ID)]))
     .$narrowType<{

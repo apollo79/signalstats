@@ -6,6 +6,7 @@ import { type ChartData } from "chart.js";
 import { LineChart, WordCloudChart } from "~/components/ui/charts";
 
 import { dmPartnerRecipientQuery, dmSentMessagesPerPersonOverviewQuery, SELF_ID, threadMostUsedWordsQuery } from "~/db";
+import { getNameFromRecipient } from "~/lib/getNameFromRecipient";
 
 export const DmId: Component<RouteSectionProps> = (props) => {
   const dmId = () => Number(props.params.dmid);
@@ -17,10 +18,11 @@ export const DmId: Component<RouteSectionProps> = (props) => {
     if (dmPartner) {
       return {
         id: dmPartner._id,
-        name: /* can be empty string */ !dmPartner.system_joined_name
-          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            dmPartner.profile_joined_name!
-          : dmPartner.system_joined_name,
+        name: getNameFromRecipient(
+          dmPartner.nickname_joined_name,
+          dmPartner.system_joined_name,
+          dmPartner.profile_joined_name,
+        ),
       };
     }
   });

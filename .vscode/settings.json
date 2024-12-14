@@ -1,5 +1,12 @@
 {
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
-    }
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "typescript.inlayHints.parameterNames.enabled": "all"
 }

@@ -23,11 +23,7 @@ export const Home: Component<RouteSectionProps> = () => {
 
   return (
     <div>
-      <input
-        type="file"
-        accept=".sqlite"
-        onChange={onFileChange}
-      ></input>
+      <input type="file" accept=".sqlite" onChange={onFileChange}></input>
     </div>
   );
 };

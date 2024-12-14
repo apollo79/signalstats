@@ -76,11 +76,7 @@ export const columns = [
           }}
         >
           Name
-          <SortingDisplay
-            sorting={sorting()}
-            class="ml-2 h-4 w-4"
-            activeClass="text-info-foreground"
-          />
+          <SortingDisplay sorting={sorting()} class="ml-2 h-4 w-4" activeClass="text-info-foreground" />
         </Button>
       );
     },
@@ -94,18 +90,12 @@ export const columns = [
           <Show when={isArchived || isGroup}>
             <div class="ml-auto flex flex-row gap-2">
               <Show when={isArchived}>
-                <Badge
-                  variant="outline"
-                  class="ml-auto"
-                >
+                <Badge variant="outline" class="ml-auto">
                   Archived
                 </Badge>
               </Show>
               <Show when={isGroup}>
-                <Badge
-                  variant="outline"
-                  class="ml-auto"
-                >
+                <Badge variant="outline" class="ml-auto">
                   Group
                 </Badge>
               </Show>
@@ -128,11 +118,7 @@ export const columns = [
           }}
         >
           Number of messages
-          <SortingDisplay
-            sorting={sorting()}
-            class="ml-2 h-4 w-4"
-            activeClass="text-info-foreground"
-          />
+          <SortingDisplay sorting={sorting()} class="ml-2 h-4 w-4" activeClass="text-info-foreground" />
         </Button>
       );
     },
@@ -150,11 +136,7 @@ export const columns = [
           }}
         >
           Date of last message
-          <SortingDisplay
-            sorting={sorting()}
-            class="ml-2 h-4 w-4"
-            activeClass="text-info-foreground"
-          />
+          <SortingDisplay sorting={sorting()} class="ml-2 h-4 w-4" activeClass="text-info-foreground" />
         </Button>
       );
     },
@@ -252,10 +234,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
             value={(table.getColumn("name")?.getFilterValue() as string | undefined) ?? ""}
             onChange={(value) => table.getColumn("name")?.setFilterValue(value)}
           >
-            <TextFieldInput
-              placeholder="Filter by name..."
-              class="max-w-sm"
-            />
+            <TextFieldInput placeholder="Filter by name..." class="max-w-sm" />
           </TextField>
         </div>
         <div class="flex items-start space-x-2">
@@ -277,7 +256,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
                 <For each={headerGroup.headers}>
                   {(header) => (
                     <TableHead
-                      class="border-b border-r border-t first-of-type:rounded-tl-md first-of-type:border-l last-of-type:rounded-tr-md"
+                      class="border-t border-r border-b first-of-type:rounded-tl-md first-of-type:border-l last-of-type:rounded-tr-md"
                       colSpan={header.colSpan}
                     >
                       <Show when={!header.isPlaceholder}>
@@ -297,7 +276,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  class="h-24 border-b border-r text-center first-of-type:rounded-tl-md first-of-type:border-l last-of-type:rounded-br-md"
+                  class="h-24 border-r border-b text-center first-of-type:rounded-tl-md first-of-type:border-l last-of-type:rounded-br-md"
                 >
                   No results.
                 </TableCell>
@@ -318,7 +297,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
                 >
                   <For each={row.getVisibleCells()}>
                     {(cell) => (
-                      <TableCell class="border-b border-r first-of-type:border-l">
+                      <TableCell class="border-r border-b first-of-type:border-l">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     )}
