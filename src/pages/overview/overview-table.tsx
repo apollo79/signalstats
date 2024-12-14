@@ -25,6 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~
 import { TextField, TextFieldInput } from "~/components/ui/text-field";
 
 import { cn } from "~/lib/utils";
+import { Flex } from "~/components/ui/flex";
 
 export interface RoomOverview {
   threadId: number;
@@ -85,10 +86,12 @@ export const columns = [
       const isGroup = props.row.getValue("isGroup");
 
       return (
-        <div class="flex w-full flex-row">
-          <span class="font-bold">{props.cell.getValue()}</span>
+        <Flex class="w-full" flexDirection="row">
+          <span class="max-w-2xl overflow-hidden text-ellipsis whitespace-nowrap font-bold">
+            {props.cell.getValue()}
+          </span>
           <Show when={isArchived || isGroup}>
-            <div class="ml-auto flex flex-row gap-2">
+            <Flex flexDirection="row" class="ml-auto gap-2">
               <Show when={isArchived}>
                 <Badge variant="outline" class="ml-auto">
                   Archived
@@ -99,9 +102,9 @@ export const columns = [
                   Group
                 </Badge>
               </Show>
-            </div>
+            </Flex>
           </Show>
-        </div>
+        </Flex>
       );
     },
   }),

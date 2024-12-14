@@ -1,5 +1,5 @@
-import type { Component } from "solid-js";
-import { createEffect, createSignal, mergeProps, on, onCleanup, onMount } from "solid-js";
+import type { Component, JSX } from "solid-js";
+import { createEffect, createSignal, mergeProps, on, onCleanup, onMount, splitProps } from "solid-js";
 import { unwrap } from "solid-js/store";
 
 import type { Ref } from "@solid-primitives/refs";
@@ -51,9 +51,10 @@ interface TypedChartProps {
   height?: number | undefined;
 }
 
-type ChartProps = TypedChartProps & {
-  type: ChartType;
-};
+type ChartProps = JSX.CanvasHTMLAttributes<HTMLCanvasElement> &
+  TypedChartProps & {
+    type: ChartType;
+  };
 
 interface ChartContext {
   chart: Chart;
@@ -73,6 +74,8 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
     },
     rawProps,
   );
+
+  const [, otherProps] = splitProps(props, ["options", "plugins", "data"]);
 
   const init = () => {
     const ctx = canvasRef()?.getContext("2d") as ChartItem;
@@ -153,7 +156,7 @@ const BaseChart: Component<ChartProps> = (rawProps) => {
   });
 
   Chart.register(Colors, Filler, Legend, Tooltip);
-  return <canvas ref={mergeRefs(props.ref, (el) => setCanvasRef(el))} height={props.height} width={props.width} />;
+  return <canvas ref={mergeRefs(props.ref, (el) => setCanvasRef(el))} {...otherProps} />;
 };
 
 function showTooltip(context: ChartContext) {
@@ -202,7 +205,10 @@ function showTooltip(context: ChartContext) {
   el.style.pointerEvents = "none";
 }
 
-function createTypedChart(type: ChartType, components: ChartComponent[]): Component<TypedChartProps> {
+function createTypedChart(
+  type: ChartType,
+  components: ChartComponent[],
+): Component<TypedChartProps & JSX.CanvasHTMLAttributes<HTMLCanvasElement>> {
   const chartsWithScales: ChartType[] = ["bar", "line", "scatter"];
   const chartsWithLegends: ChartType[] = ["bar", "line"];
 

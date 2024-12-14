@@ -1,4 +1,12 @@
-import { type Accessor, createEffect, createMemo, createRoot, createSignal, DEV, type Setter } from "solid-js";
+import {
+  type Accessor,
+  createEffect,
+  createMemo,
+  createRoot,
+  createSignal,
+  DEV,
+  type Setter,
+} from "solid-js";
 
 import { Kysely, type NotNull, sql } from "kysely";
 import type { DB } from "kysely-codegen";
@@ -71,13 +79,19 @@ const allThreadsOverviewQueryRaw = kyselyDb()
     (eb) =>
       eb
         .selectFrom("message")
-        .select((eb) => ["message.thread_id", eb.fn.countAll().as("message_count")])
+        .select((eb) => [
+          "message.thread_id",
+          eb.fn.countAll().as("message_count"),
+        ])
         .where((eb) => {
-          return eb.and([eb("message.body", "is not", null), eb("message.body", "is not", "")]);
+          return eb.and([
+            eb("message.body", "is not", null),
+            eb("message.body", "is not", ""),
+          ]);
         })
         .groupBy("message.thread_id")
         .as("message"),
-    (join) => join.onRef("message.thread_id", "=", "thread._id"),
+    (join) => join.onRef("message.thread_id", "=", "thread._id")
   )
   .innerJoin("recipient", "thread.recipient_id", "recipient._id")
   .leftJoin("groups", "recipient._id", "groups.recipient_id")
@@ -100,7 +114,9 @@ const allThreadsOverviewQueryRaw = kyselyDb()
   }>()
   .compile();
 
-export const allThreadsOverviewQuery = cached(() => kyselyDb().executeQuery(allThreadsOverviewQueryRaw));
+export const allThreadsOverviewQuery = cached(() =>
+  kyselyDb().executeQuery(allThreadsOverviewQueryRaw)
+);
 
 const overallSentMessagesQueryRaw = (recipientId: number) =>
   kyselyDb()
@@ -111,7 +127,7 @@ const overallSentMessagesQueryRaw = (recipientId: number) =>
         eb("message.from_recipient_id", "=", recipientId),
         eb("message.body", "is not", null),
         eb("message.body", "!=", ""),
-      ]),
+      ])
     )
     .executeTakeFirst();
 
@@ -127,7 +143,9 @@ const dmPartnerRecipientQueryRaw = (dmId: number) =>
       "recipient.nickname_joined_name",
     ])
     .innerJoin("thread", "recipient._id", "thread.recipient_id")
-    .where((eb) => eb.and([eb("thread._id", "=", dmId), eb("recipient._id", "!=", SELF_ID)]))
+    .where((eb) =>
+      eb.and([eb("thread._id", "=", dmId), eb("recipient._id", "!=", SELF_ID)])
+    )
     .$narrowType<{
       _id: number;
     }>()
@@ -139,13 +157,18 @@ const dmOverviewQueryRaw = (dmId: number) =>
   kyselyDb()
     .selectFrom("message")
     .select((eb) => [
-      sql<Date>`DATE(datetime(message.date_sent / 1000, 'unixepoch'))`.as("message_date"),
       eb.fn.countAll().as("message_count"),
+      eb.fn.min("date_sent").as("first_message_date"),
+      eb.fn.max("date_sent").as("last_message_date"),
     ])
-    .groupBy("message_date")
-    .orderBy("message_date asc")
-    .where("thread_id", "=", dmId)
-    .execute();
+    .where((eb) =>
+      eb.and([
+        eb("thread_id", "=", dmId),
+        eb("body", "is not", null),
+        eb("body", "!=", ""),
+      ])
+    )
+    .executeTakeFirst();
 
 export const dmOverviewQuery = cached(dmOverviewQueryRaw);
 
@@ -154,18 +177,28 @@ const threadSentMessagesPerPersonOverviewQueryRaw = (threadId: number) =>
     .selectFrom("message")
     .select((eb) => [
       "from_recipient_id",
-      sql<Date>`DATE(datetime(message.date_sent / 1000, 'unixepoch'))`.as("message_date"),
+      sql<Date>`DATE(datetime(message.date_sent / 1000, 'unixepoch'))`.as(
+        "message_date"
+      ),
       eb.fn.countAll().as("message_count"),
     ])
     .groupBy(["from_recipient_id", "message_date"])
     .orderBy(["message_date"])
-    .where((eb) => eb.and([eb("body", "is not", null), eb("body", "!=", ""), eb("thread_id", "=", threadId)]))
+    .where((eb) =>
+      eb.and([
+        eb("body", "is not", null),
+        eb("body", "!=", ""),
+        eb("thread_id", "=", threadId),
+      ])
+    )
     .$narrowType<{
       message_count: number;
     }>()
     .execute();
 
-export const dmSentMessagesPerPersonOverviewQuery = cached(threadSentMessagesPerPersonOverviewQueryRaw);
+export const dmSentMessagesPerPersonOverviewQuery = cached(
+  threadSentMessagesPerPersonOverviewQueryRaw
+);
 
 const threadMostUsedWordsQueryRaw = (threadId: number, limit = 10) =>
   kyselyDb()
@@ -176,12 +209,16 @@ const threadMostUsedWordsQueryRaw = (threadId: number, limit = 10) =>
           sql`LOWER(substr(body, 1, instr(body || " ", " ") - 1))`.as("word"),
           sql`(substr(body, instr(body || " ", " ") + 1))`.as("rest"),
         ])
-        .where((eb) => eb.and([eb("body", "is not", null), eb("thread_id", "=", threadId)]))
+        .where((eb) =>
+          eb.and([eb("body", "is not", null), eb("thread_id", "=", threadId)])
+        )
         .unionAll((ebInner) => {
           return ebInner
             .selectFrom("words")
             .select([
-              sql`LOWER(substr(rest, 1, instr(rest || " ", " ") - 1))`.as("word"),
+              sql`LOWER(substr(rest, 1, instr(rest || " ", " ") - 1))`.as(
+                "word"
+              ),
               sql`(substr(rest, instr(rest || " ", " ") + 1))`.as("rest"),
             ])
             .where("rest", "<>", "");

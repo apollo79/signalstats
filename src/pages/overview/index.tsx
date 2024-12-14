@@ -4,7 +4,7 @@ import type { RouteSectionProps } from "@solidjs/router";
 import { allThreadsOverviewQuery, overallSentMessagesQuery, SELF_ID } from "~/db";
 
 import { OverviewTable, type RoomOverview } from "./overview-table";
-import { getNameFromRecipient } from "~/lib/getNameFromRecipient";
+import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
 
 export const Overview: Component<RouteSectionProps> = () => {
   const [allSelfSentMessagesCount] = createResource(() => overallSentMessagesQuery(SELF_ID));

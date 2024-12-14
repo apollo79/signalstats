@@ -5,11 +5,34 @@ import { type ChartData } from "chart.js";
 
 import { LineChart, WordCloudChart } from "~/components/ui/charts";
 
-import { dmPartnerRecipientQuery, dmSentMessagesPerPersonOverviewQuery, SELF_ID, threadMostUsedWordsQuery } from "~/db";
-import { getNameFromRecipient } from "~/lib/getNameFromRecipient";
+import {
+  dmOverviewQuery,
+  dmPartnerRecipientQuery,
+  dmSentMessagesPerPersonOverviewQuery,
+  SELF_ID,
+  threadMostUsedWordsQuery,
+} from "~/db";
+import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
+import { Heading } from "~/components/ui/heading";
+import { Grid } from "~/components/ui/grid";
+import { Flex } from "~/components/ui/flex";
+import { CalendarArrowUp, CalendarArrowDown, CalendarClock, MessagesSquare } from "lucide-solid";
+import { getDistanceBetweenDatesInDays } from "~/lib/date";
 
 export const DmId: Component<RouteSectionProps> = (props) => {
   const dmId = () => Number(props.params.dmid);
+
+  const [dmOverview] = createResource(async () => {
+    const dmOverview = await dmOverviewQuery(dmId());
+
+    if (dmOverview) {
+      return {
+        messageCount: dmOverview.message_count,
+        firstMessageDate: new Date(dmOverview.first_message_date),
+        lastMessageDate: new Date(dmOverview.last_message_date),
+      };
+    }
+  });
 
   // the other person in the chat with name and id
   const [dmPartner] = createResource(async () => {
@@ -140,43 +163,108 @@ export const DmId: Component<RouteSectionProps> = (props) => {
   };
 
   return (
-    <div>
+    <div class="flex flex-col items-center">
+      <Heading level={1}>DM with {dmPartner()?.name}</Heading>
+      <Heading level={2}>Chat timeline</Heading>
       <Show when={dateChartData()}>
         {(currentDateChartData) => (
-          <div class="max-h-96">
-            <LineChart
-              options={{
-                normalized: true,
-                aspectRatio: 2,
-                plugins: {
+          <LineChart
+            options={{
+              normalized: true,
+              aspectRatio: 3,
+              plugins: {
+                zoom: {
+                  pan: {
+                    enabled: true,
+                    mode: "xy",
+                  },
                   zoom: {
-                    pan: {
+                    wheel: {
                       enabled: true,
-                      mode: "xy",
                     },
-                    zoom: {
-                      wheel: {
-                        enabled: true,
-                      },
-                      pinch: {
-                        enabled: true,
-                      },
-                      mode: "xy",
+                    pinch: {
+                      enabled: true,
                     },
+                    mode: "xy",
                   },
                 },
-              }}
-              data={currentDateChartData()}
-            />
-          </div>
+              },
+            }}
+            data={currentDateChartData()}
+            class="max-h-96"
+          />
         )}
       </Show>
+      <Grid cols={1} colsMd={2} class="my-12 min-w-[35rem] gap-y-8 text-sm">
+        <Flex flexDirection="row" justifyContent="evenly" class="bg-amber-200 p-2 text-amber-900">
+          <Flex alignItems="center" justifyContent="center" class="min-w-16">
+            <CalendarArrowDown />
+          </Flex>
+          <Flex flexDirection="col" justifyContent="around" class="flex-1">
+            <span>Your first message is from</span>
+            <Show when={!dmOverview.loading && dmOverview()}>
+              {(currentDmOverview) => (
+                <span class="font-semibold text-2xl">{currentDmOverview().firstMessageDate.toLocaleDateString()}</span>
+              )}
+            </Show>
+          </Flex>
+        </Flex>
+        <Flex flexDirection="row" justifyContent="evenly" class="bg-emerald-200 p-2 text-emerald-900">
+          <Flex alignItems="center" justifyContent="center" class="min-w-16">
+            <CalendarArrowUp />
+          </Flex>
+          <Flex flexDirection="col" justifyContent="around" class="flex-1">
+            <span>Your last message is from</span>
+            <Show when={!dmOverview.loading && dmOverview()}>
+              {(currentDmOverview) => (
+                <span class="font-semibold text-2xl">{currentDmOverview().lastMessageDate.toLocaleDateString()}</span>
+              )}
+            </Show>
+          </Flex>
+        </Flex>
+        <Flex flexDirection="row" justifyContent="evenly" class="bg-blue-200 p-2 text-blue-900">
+          <Flex alignItems="center" justifyContent="center" class="min-w-16">
+            <CalendarClock />
+          </Flex>
+          <Flex flexDirection="col" justifyContent="around" class="flex-1">
+            <span>You have been chatting for</span>
+            <Show when={!dmOverview.loading && dmOverview()}>
+              {(currentDmOverview) => (
+                <span class="font-semibold text-2xl">
+                  {getDistanceBetweenDatesInDays(
+                    currentDmOverview().firstMessageDate,
+                    currentDmOverview().lastMessageDate,
+                  )}
+                </span>
+              )}
+            </Show>
+            <span>days</span>
+          </Flex>
+        </Flex>
+        <Flex flexDirection="row" justifyContent="evenly" class="bg-pink-200 p-2 text-pink-900">
+          <Flex alignItems="center" justifyContent="center" class="min-w-16">
+            <MessagesSquare class="h-8 w-8" />
+          </Flex>
+          <Flex flexDirection="col" justifyContent="around" class="flex-1">
+            <span>You have written</span>
+            <Show when={!dmOverview.loading && dmOverview()}>
+              {(currentDmOverview) => (
+                <span class="font-semibold text-2xl">{currentDmOverview().messageCount.toString()}</span>
+              )}
+            </Show>
+            <span>messages</span>
+          </Flex>
+        </Flex>
+      </Grid>
+      <Heading level={2}>Word cloud</Heading>
       <Show when={mostUsedWordChartData()}>
         {(currentMostUsedWordChartData) => (
-          <div class="max-w-3xl">
+          // without a container this will scale in height infinitely somehow
+          <div class="max-w-2xl">
             <WordCloudChart
               options={{
                 normalized: true,
+                aspectRatio: 3,
                 plugins: {
                   tooltip: {
                     enabled: false,
