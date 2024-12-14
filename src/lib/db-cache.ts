@@ -1,4 +1,4 @@
-import { createEffect, on } from "solid-js";
+import { createEffect, createRoot, on } from "solid-js";
 
 const DATABASE_HASH_PREFIX = "database";
 
@@ -31,24 +31,26 @@ const HASH_STORE_KEY = "database_hash";
 
 // cannot import `db` the normal way because this file is imported in ~/db.ts before the initialisation of `db` has happened
 queueMicrotask(() => {
-  void import("~/db").then(({ db }) => {
-    createEffect(
-      on(db, (currentDb) => {
-        if (currentDb) {
-          const newHash = hashString(new TextDecoder().decode(currentDb.export())).toString();
+  createRoot(() => {
+    void import("~/db").then(({ db }) => {
+      createEffect(
+        on(db, (currentDb) => {
+          if (currentDb) {
+            const newHash = hashString(new TextDecoder().decode(currentDb.export())).toString();
 
-          const oldHash = localStorage.getItem(HASH_STORE_KEY);
+            const oldHash = localStorage.getItem(HASH_STORE_KEY);
 
-          console.log(newHash, oldHash);
+            console.log(newHash, oldHash);
 
-          if (newHash !== oldHash) {
-            clearDbCache();
+            if (newHash !== oldHash) {
+              clearDbCache();
 
-            localStorage.setItem(HASH_STORE_KEY, newHash);
+              localStorage.setItem(HASH_STORE_KEY, newHash);
+            }
           }
-        }
-      }),
-    );
+        }),
+      );
+    });
   });
 });
 

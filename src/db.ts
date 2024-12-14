@@ -1,4 +1,4 @@
-import { type Accessor, createEffect, createMemo, createSignal, DEV, type Setter } from "solid-js";
+import { type Accessor, createEffect, createMemo, createRoot, createSignal, DEV, type Setter } from "solid-js";
 
 import { Kysely, type NotNull, sql } from "kysely";
 import type { DB } from "kysely-codegen";
@@ -41,25 +41,27 @@ const sqlJsDialect = () => {
   }
 };
 
-createEffect(() => {
-  const db = rawDb();
+const kyselyDb = createRoot(() => {
+  createEffect(() => {
+    const db = rawDb();
 
-  if (db) {
-    db.create_function("is_not_empty", (str: string | null) => {
-      return str !== null && str !== "";
+    if (db) {
+      db.create_function("is_not_empty", (str: string | null) => {
+        return str !== null && str !== "";
+      });
+    }
+  });
+
+  return createMemo(() => {
+    const currentSqlJsDialect = sqlJsDialect();
+
+    if (!currentSqlJsDialect) {
+      throw new Error("no db selected!");
+    }
+
+    return new Kysely<DB>({
+      dialect: currentSqlJsDialect,
     });
-  }
-});
-
-const kyselyDb = createMemo(() => {
-  const currentSqlJsDialect = sqlJsDialect();
-
-  if (!currentSqlJsDialect) {
-    throw new Error("no db selected!");
-  }
-
-  return new Kysely<DB>({
-    dialect: currentSqlJsDialect,
   });
 });
 

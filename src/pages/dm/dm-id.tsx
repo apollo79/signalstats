@@ -1,4 +1,4 @@
-import { type Accessor, type Component, createEffect, createResource, Show } from "solid-js";
+import { type Accessor, type Component, createResource, Show } from "solid-js";
 import type { RouteSectionProps } from "@solidjs/router";
 
 import { type ChartData } from "chart.js";
@@ -175,6 +175,14 @@ export const DmId: Component<RouteSectionProps> = (props) => {
             <WordCloudChart
               options={{
                 normalized: true,
+                plugins: {
+                  tooltip: {
+                    enabled: false,
+                  },
+                  legend: {
+                    display: false,
+                  },
+                },
               }}
               data={currentMostUsedWordChartData()}
             />

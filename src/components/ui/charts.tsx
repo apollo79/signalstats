@@ -191,8 +191,8 @@ function showTooltip(context: ChartContext) {
   const pos = context.chart.canvas.getBoundingClientRect();
   el.style.opacity = "1";
   el.style.position = "absolute";
-  el.style.left = `${pos.left + window.scrollX + model.caretX}px`;
-  el.style.top = `${pos.top + window.scrollY + model.caretY}px`;
+  el.style.left = `${(pos.left + window.scrollX + model.caretX).toString()}px`;
+  el.style.top = `${(pos.top + window.scrollY + model.caretY).toString()}px`;
   el.style.pointerEvents = "none";
 }
 
