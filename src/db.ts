@@ -177,7 +177,7 @@ const threadSentMessagesPerPersonOverviewQueryRaw = (threadId: number) =>
     .selectFrom("message")
     .select((eb) => [
       "from_recipient_id",
-      sql<Date>`DATE(datetime(message.date_sent / 1000, 'unixepoch'))`.as(
+      sql<string>`DATE(datetime(message.date_sent / 1000, 'unixepoch'))`.as(
         "message_date"
       ),
       eb.fn.countAll().as("message_count"),
@@ -198,6 +198,27 @@ const threadSentMessagesPerPersonOverviewQueryRaw = (threadId: number) =>
 
 export const dmSentMessagesPerPersonOverviewQuery = cached(
   threadSentMessagesPerPersonOverviewQueryRaw
+);
+
+const threadSentMessagesOverviewQueryRaw = (threadId: number) =>
+  kyselyDb()
+    .selectFrom("message")
+    .select([
+      "from_recipient_id",
+      sql<Date>`datetime(date_sent / 1000, 'unixepoch')`.as("message_datetime"),
+    ])
+    .orderBy(["message_datetime"])
+    .where((eb) =>
+      eb.and([
+        eb("body", "is not", null),
+        eb("body", "!=", ""),
+        eb("thread_id", "=", threadId),
+      ])
+    )
+    .execute();
+
+export const threadSentMessagesOverviewQuery = cached(
+  threadSentMessagesOverviewQueryRaw
 );
 
 const threadMostUsedWordsQueryRaw = (threadId: number, limit = 10) =>

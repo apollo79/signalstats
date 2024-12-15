@@ -1,9 +1,9 @@
-import { type Accessor, type Component, createResource, Show } from "solid-js";
+import { type Accessor, type Component, createEffect, createResource, Show } from "solid-js";
 import type { RouteSectionProps } from "@solidjs/router";
 
 import { type ChartData } from "chart.js";
 
-import { LineChart, WordCloudChart } from "~/components/ui/charts";
+import { LineChart, RadarChart, WordCloudChart } from "~/components/ui/charts";
 
 import {
   dmOverviewQuery,
@@ -11,6 +11,7 @@ import {
   dmSentMessagesPerPersonOverviewQuery,
   SELF_ID,
   threadMostUsedWordsQuery,
+  threadSentMessagesOverviewQuery,
 } from "~/db";
 import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
 import { Heading } from "~/components/ui/heading";
@@ -18,6 +19,29 @@ import { Grid } from "~/components/ui/grid";
 import { Flex } from "~/components/ui/flex";
 import { CalendarArrowUp, CalendarArrowDown, CalendarClock, MessagesSquare } from "lucide-solid";
 import { getDistanceBetweenDatesInDays } from "~/lib/date";
+
+type MonthIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+
+const monthNames: Record<MonthIndex, string> = {
+  1: "January",
+  2: "February",
+  3: "March",
+  4: "April",
+  5: "May",
+  6: "June",
+  7: "July",
+  8: "August",
+  9: "September",
+  10: "October",
+  11: "November",
+  12: "December",
+};
+
+const initialMonthMap = Object.fromEntries(
+  Array(12)
+    .fill(0)
+    .map((_value, index) => [index + 1, 0]),
+) as Record<MonthIndex, number>;
 
 export const DmId: Component<RouteSectionProps> = (props) => {
   const dmId = () => Number(props.params.dmid);
@@ -52,16 +76,46 @@ export const DmId: Component<RouteSectionProps> = (props) => {
 
   const [dmMessagesPerPerson] = createResource(() => dmSentMessagesPerPersonOverviewQuery(dmId()));
 
+  const [dmMessagesOverview] = createResource(async () => {
+    const dmMessageOverview = await threadSentMessagesOverviewQuery(dmId());
+    if (dmMessageOverview) {
+      return dmMessageOverview.map((row) => {
+        return {
+          messageDate: new Date(row.message_datetime),
+          recipientId: row.from_recipient_id,
+        };
+      });
+    }
+  });
+
+  const dmMessagesPerMonth = () => {
+    const currentDmMessagesOverview = dmMessagesOverview();
+
+    if (currentDmMessagesOverview) {
+      return currentDmMessagesOverview.reduce<Record<MonthIndex, number>>(
+        (prev, curr) => {
+          const month = curr.messageDate.getMonth() as MonthIndex;
+
+          prev[month as MonthIndex] += 1;
+
+          return prev;
+        },
+        { ...initialMonthMap },
+      );
+    }
+  };
+
   // maps all the message counts to dates
-  const dmMessages = () => {
+  const dmMessagesPerDateOverview = () => {
     return dmMessagesPerPerson()?.reduce<
       {
+        rawDate: string;
         date: Date;
         totalMessages: number;
         [recipientId: number]: number;
       }[]
     >((prev, curr) => {
-      const existingDate = prev.find(({ date }) => date === curr.message_date);
+      const existingDate = prev.find(({ rawDate }) => rawDate === curr.message_date);
 
       if (existingDate) {
         existingDate[curr.from_recipient_id] = curr.message_count;
@@ -69,7 +123,8 @@ export const DmId: Component<RouteSectionProps> = (props) => {
         existingDate.totalMessages += curr.message_count;
       } else {
         prev.push({
-          date: curr.message_date,
+          rawDate: curr.message_date,
+          date: new Date(curr.message_date),
           totalMessages: curr.message_count,
           [curr.from_recipient_id]: curr.message_count,
         });
@@ -128,12 +183,12 @@ export const DmId: Component<RouteSectionProps> = (props) => {
   };
 
   const dateChartData: Accessor<ChartData<"line"> | undefined> = () => {
-    const currentDmMessages = dmMessages();
+    const currentDmMessages = dmMessagesPerDateOverview();
     const currentRecipients = recipients();
 
     if (currentDmMessages) {
       return {
-        labels: currentDmMessages.map((row) => row.date),
+        labels: currentDmMessages.map((row) => row.date.toDateString()),
         datasets: [
           {
             label: "Total number of messages",
@@ -157,6 +212,22 @@ export const DmId: Component<RouteSectionProps> = (props) => {
               };
             }),
           ),
+        ],
+      };
+    }
+  };
+
+  const monthChartData: Accessor<ChartData<"radar"> | undefined> = () => {
+    const currentMessagesPerMonth = dmMessagesPerMonth();
+
+    if (currentMessagesPerMonth) {
+      return {
+        labels: Object.values(monthNames),
+        datasets: [
+          {
+            label: "Number of messages",
+            data: Object.values(currentMessagesPerMonth),
+          },
         ],
       };
     }
@@ -198,33 +269,33 @@ export const DmId: Component<RouteSectionProps> = (props) => {
       <Grid cols={1} colsMd={2} class="my-12 min-w-[35rem] gap-y-8 text-sm">
         <Flex flexDirection="row" justifyContent="evenly" class="bg-amber-200 p-2 text-amber-900">
           <Flex alignItems="center" justifyContent="center" class="min-w-16">
-            <CalendarArrowDown />
+            <CalendarArrowDown class="h-8 w-8" />
           </Flex>
           <Flex flexDirection="col" justifyContent="around" class="flex-1">
             <span>Your first message is from</span>
             <Show when={!dmOverview.loading && dmOverview()}>
               {(currentDmOverview) => (
-                <span class="font-semibold text-2xl">{currentDmOverview().firstMessageDate.toLocaleDateString()}</span>
+                <span class="font-semibold text-2xl">{currentDmOverview().firstMessageDate.toDateString()}</span>
               )}
             </Show>
           </Flex>
         </Flex>
         <Flex flexDirection="row" justifyContent="evenly" class="bg-emerald-200 p-2 text-emerald-900">
           <Flex alignItems="center" justifyContent="center" class="min-w-16">
-            <CalendarArrowUp />
+            <CalendarArrowUp class="h-8 w-8" />
           </Flex>
           <Flex flexDirection="col" justifyContent="around" class="flex-1">
             <span>Your last message is from</span>
             <Show when={!dmOverview.loading && dmOverview()}>
               {(currentDmOverview) => (
-                <span class="font-semibold text-2xl">{currentDmOverview().lastMessageDate.toLocaleDateString()}</span>
+                <span class="font-semibold text-2xl">{currentDmOverview().lastMessageDate.toDateString()}</span>
               )}
             </Show>
           </Flex>
         </Flex>
         <Flex flexDirection="row" justifyContent="evenly" class="bg-blue-200 p-2 text-blue-900">
           <Flex alignItems="center" justifyContent="center" class="min-w-16">
-            <CalendarClock />
+            <CalendarClock class="h-8 w-8" />
           </Flex>
           <Flex flexDirection="col" justifyContent="around" class="flex-1">
             <span>You have been chatting for</span>
@@ -256,6 +327,24 @@ export const DmId: Component<RouteSectionProps> = (props) => {
           </Flex>
         </Flex>
       </Grid>
+      <Heading level={2}>Messages per</Heading>
+      <div>
+        <Heading level={3}>Month</Heading>
+        <Grid cols={1} colsMd={2}>
+          <Show when={monthChartData()}>
+            {(currentMonthChartData) => (
+              <RadarChart
+                title="Month"
+                options={{
+                  normalized: true,
+                }}
+                data={currentMonthChartData()}
+                class="max-h-96"
+              />
+            )}
+          </Show>
+        </Grid>
+      </div>
       <Heading level={2}>Word cloud</Heading>
       <Show when={mostUsedWordChartData()}>
         {(currentMostUsedWordChartData) => (
