@@ -1,6 +1,7 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 import { Router } from "@solidjs/router";
+import { MetaProvider } from "@solidjs/meta";
 
 import App from "./App";
 
@@ -16,9 +17,11 @@ if (root) {
   render(
     () => (
       <div class="mx-auto max-w-screen-2xl">
-        <Router>
-          <App />
-        </Router>
+        <MetaProvider>
+          <Router>
+            <App />
+          </Router>
+        </MetaProvider>
       </div>
     ),
     root,

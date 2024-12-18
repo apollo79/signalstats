@@ -13,23 +13,6 @@ const App: Component = () => {
       <Route path="/overview" component={Overview} />
       <Route path="/dm/:dmid" component={DmId} />
       <Route path="/group/:groupid" component={GroupId} />
-      <Route
-        path="/test"
-        component={() => {
-          console.time("first");
-          console.log(allThreadsOverviewQuery());
-          void allThreadsOverviewQuery().then((result) => {
-            console.log(result);
-            console.timeEnd("first");
-            console.time("second");
-            void allThreadsOverviewQuery().then((result) => {
-              console.log(result);
-              console.timeEnd("second");
-            });
-          });
-          return "";
-        }}
-      />
     </>
   );
 };

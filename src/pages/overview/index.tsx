@@ -5,6 +5,7 @@ import { allThreadsOverviewQuery, overallSentMessagesQuery, SELF_ID } from "~/db
 
 import { OverviewTable, type RoomOverview } from "./overview-table";
 import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
+import { Title } from "@solidjs/meta";
 
 export const Overview: Component<RouteSectionProps> = () => {
   const [allSelfSentMessagesCount] = createResource(() => overallSentMessagesQuery(SELF_ID));
@@ -34,12 +35,16 @@ export const Overview: Component<RouteSectionProps> = () => {
   });
 
   return (
-    <div>
-      <p>All messages: {allSelfSentMessagesCount()?.messageCount as number}</p>
-      <Show when={!roomOverview.loading && roomOverview()} fallback="Loading...">
-        {(currentRoomOverview) => <OverviewTable data={currentRoomOverview()} />}
-      </Show>
-    </div>
+    <>
+      <Title>Signal statistics overview</Title>
+
+      <div>
+        <p>All messages: {allSelfSentMessagesCount()?.messageCount as number}</p>
+        <Show when={!roomOverview.loading && roomOverview()} fallback="Loading...">
+          {(currentRoomOverview) => <OverviewTable data={currentRoomOverview()} />}
+        </Show>
+      </div>
+    </>
   );
 };
 

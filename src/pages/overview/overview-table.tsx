@@ -47,6 +47,14 @@ const archivedFilterFn: FilterFn<RoomOverview> = (row, _columnId, filterValue) =
   return !row.original.archived;
 };
 
+const isGroupFilterFn: FilterFn<RoomOverview> = (row, _columnId, filterValue) => {
+  if (filterValue === true) {
+    return true;
+  }
+
+  return !row.original.isGroup;
+};
+
 const SortingDisplay: Component<{ sorting: false | SortDirection; class?: string; activeClass?: string }> = (props) => {
   return (
     <Switch>
@@ -166,7 +174,7 @@ export const columns = [
     filterFn: archivedFilterFn,
   }),
   columnHelper.accessor("isGroup", {
-    header: "Group",
+    header: "isGroup",
     cell: (props) => {
       return (
         <Show when={props.cell.getValue()}>
@@ -174,6 +182,7 @@ export const columns = [
         </Show>
       );
     },
+    filterFn: isGroupFilterFn,
   }),
 ];
 
@@ -191,6 +200,10 @@ export const OverviewTable = (props: OverviewTableProps) => {
   const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>([
     {
       id: "archived",
+      value: false,
+    },
+    {
+      id: "isGroup",
       value: false,
     },
   ]);
@@ -248,6 +261,16 @@ export const OverviewTable = (props: OverviewTableProps) => {
           />
           <div class="grid gap-1.5 leading-none">
             <Label for="show-archived">Show archived chats</Label>
+          </div>
+        </div>
+        <div class="flex items-start space-x-2">
+          <Checkbox
+            id="show-archived"
+            checked={(table.getColumn("isGroup")?.getFilterValue() as boolean | undefined) ?? false}
+            onChange={(value) => table.getColumn("isGroup")?.setFilterValue(value)}
+          />
+          <div class="grid gap-1.5 leading-none">
+            <Label for="show-archived">Show group chats (detailed analysis not implemented)</Label>
           </div>
         </div>
       </div>

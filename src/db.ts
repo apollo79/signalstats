@@ -153,59 +153,14 @@ const dmPartnerRecipientQueryRaw = (dmId: number) =>
 
 export const dmPartnerRecipientQuery = cached(dmPartnerRecipientQueryRaw);
 
-const dmOverviewQueryRaw = (dmId: number) =>
-  kyselyDb()
-    .selectFrom("message")
-    .select((eb) => [
-      eb.fn.countAll().as("message_count"),
-      eb.fn.min("date_sent").as("first_message_date"),
-      eb.fn.max("date_sent").as("last_message_date"),
-    ])
-    .where((eb) =>
-      eb.and([
-        eb("thread_id", "=", dmId),
-        eb("body", "is not", null),
-        eb("body", "!=", ""),
-      ])
-    )
-    .executeTakeFirst();
-
-export const dmOverviewQuery = cached(dmOverviewQueryRaw);
-
-const threadSentMessagesPerPersonOverviewQueryRaw = (threadId: number) =>
-  kyselyDb()
-    .selectFrom("message")
-    .select((eb) => [
-      "from_recipient_id",
-      sql<string>`DATE(datetime(message.date_sent / 1000, 'unixepoch'))`.as(
-        "message_date"
-      ),
-      eb.fn.countAll().as("message_count"),
-    ])
-    .groupBy(["from_recipient_id", "message_date"])
-    .orderBy(["message_date"])
-    .where((eb) =>
-      eb.and([
-        eb("body", "is not", null),
-        eb("body", "!=", ""),
-        eb("thread_id", "=", threadId),
-      ])
-    )
-    .$narrowType<{
-      message_count: number;
-    }>()
-    .execute();
-
-export const dmSentMessagesPerPersonOverviewQuery = cached(
-  threadSentMessagesPerPersonOverviewQueryRaw
-);
-
 const threadSentMessagesOverviewQueryRaw = (threadId: number) =>
   kyselyDb()
     .selectFrom("message")
     .select([
       "from_recipient_id",
-      sql<Date>`datetime(date_sent / 1000, 'unixepoch')`.as("message_datetime"),
+      sql<string>`datetime(date_sent / 1000, 'unixepoch')`.as(
+        "message_datetime"
+      ),
     ])
     .orderBy(["message_datetime"])
     .where((eb) =>

@@ -1,4 +1,4 @@
-import { createEffect, createRoot, on } from "solid-js";
+import { createRoot, on, createDeferred } from "solid-js";
 
 const DATABASE_HASH_PREFIX = "database";
 
@@ -27,35 +27,36 @@ const hashString = (str: string) => {
   return hash;
 };
 
-const HASH_STORE_KEY = "database_hash";
+const HASH_STORE_KEY = `${DATABASE_HASH_PREFIX}_hash`;
 
 // cannot import `db` the normal way because this file is imported in ~/db.ts before the initialisation of `db` has happened
-queueMicrotask(() => {
-  createRoot(() => {
-    void import("~/db").then(({ db }) => {
-      createEffect(
-        on(db, (currentDb) => {
-          if (currentDb) {
-            const newHash = hashString(new TextDecoder().decode(currentDb.export())).toString();
+createRoot(() => {
+  void import("~/db").then(({ db }) => {
+    // we use create deferred because hasing can take very long and we don't want to block the mainthread
+    createDeferred(
+      on(db, (currentDb) => {
+        if (currentDb) {
+          const newHash = hashString(
+            new TextDecoder().decode(currentDb.export())
+          ).toString();
 
-            const oldHash = localStorage.getItem(HASH_STORE_KEY);
+          const oldHash = localStorage.getItem(HASH_STORE_KEY);
 
-            console.log(newHash, oldHash);
+          if (newHash !== oldHash) {
+            clearDbCache();
 
-            if (newHash !== oldHash) {
-              clearDbCache();
-
-              localStorage.setItem(HASH_STORE_KEY, newHash);
-            }
+            localStorage.setItem(HASH_STORE_KEY, newHash);
           }
-        }),
-      );
-    });
+        }
+      })
+    );
   });
 });
 
 class LocalStorageCacheAdapter {
-  keys = new Set<string>(Object.keys(localStorage).filter((key) => key.startsWith(this.prefix)));
+  keys = new Set<string>(
+    Object.keys(localStorage).filter((key) => key.startsWith(this.prefix))
+  );
   prefix = "database";
 
   #createKey(cacheName: string, key: string): string {
@@ -66,7 +67,16 @@ class LocalStorageCacheAdapter {
     const fullKey = this.#createKey(cacheName, key);
     this.keys.add(fullKey);
 
-    localStorage.setItem(fullKey, JSON.stringify(value));
+    try {
+      localStorage.setItem(fullKey, JSON.stringify(value));
+    } catch (error: unknown) {
+      if (
+        error instanceof DOMException &&
+        error.name === "QUOTA_EXCEEDED_ERR"
+      ) {
+        console.error("Storage quota exceeded, not caching new function calls");
+      }
+    }
   }
 
   has(cacheName: string, key: string): boolean {
@@ -84,14 +94,44 @@ class LocalStorageCacheAdapter {
 
 const cache = new LocalStorageCacheAdapter();
 
-export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?: ThisType<TT>): ((...args: T) => R) => {
+const createHashKey = (...args: unknown[]) => {
+  let stringToHash = "";
+
+  for (const arg of args) {
+    switch (typeof arg) {
+      case "string":
+        stringToHash += arg;
+        break;
+      case "number":
+      case "bigint":
+      case "symbol":
+      case "function":
+        stringToHash += arg.toString();
+        break;
+      case "boolean":
+      case "undefined":
+        stringToHash += String(arg);
+        break;
+      case "object":
+        stringToHash += JSON.stringify(arg);
+        break;
+    }
+  }
+
+  return hashString(stringToHash);
+};
+
+export const cached = <T extends unknown[], R, TT>(
+  fn: (...args: T) => R,
+  self?: ThisType<TT>
+): ((...args: T) => R) => {
   const cacheName = hashString(fn.toString()).toString();
 
   // important to return a promise on follow-up calls even if the data is immediately available
   let isPromise: boolean;
 
   return (...args: T) => {
-    const cacheKey = JSON.stringify(args);
+    const cacheKey = createHashKey(...args).toString();
 
     const cachedValue = cache.get<R>(cacheName, cacheKey);
 
