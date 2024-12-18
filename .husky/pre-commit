@@ -1,3 +1,1 @@
-export PATH="$PATH:$(pnpm bin)"
-pnpm biome lint
-pnpm biome format
+pnpm dlx lint-staged
