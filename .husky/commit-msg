@@ -1,0 +1,2 @@
+export PATH="$PATH:$(pnpm bin)"
+pnpm dlx commitlint --edit $1

@@ -76,6 +76,7 @@ export const createMessageStatsSources = (
         // increment the message count of the message's weekday for this recipient
         weekday[weekdayIndex][message.fromRecipientId] += 1;
 
+        // increment the message count of the message's daytime for this recipient
         daytime[messageDate.getHours()][message.fromRecipientId] += 1;
       }
     }
