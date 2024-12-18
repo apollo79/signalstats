@@ -6,7 +6,7 @@ import { getDistanceBetweenDatesInDays } from "~/lib/date";
 import type { MessageOverview } from "~/types";
 
 export const DmOverview: Component<{
-  messages: MessageOverview;
+  messages: MessageOverview | undefined;
 }> = (props) => {
   const dmOverview = () => {
     const firstMessageDate = props.messages?.at(0)?.messageDate;

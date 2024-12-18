@@ -4,14 +4,14 @@ import { LineChart } from "~/components/ui/charts";
 import type { MessageStats, Recipients } from "~/types";
 
 export const DmMessagesPerDate: Component<{
-  dateStats: MessageStats["date"];
-  recipients: Recipients;
+  dateStats: MessageStats["date"] | undefined;
+  recipients: Recipients | undefined;
 }> = (props) => {
   const dateChartData: Accessor<ChartData<"line"> | undefined> = () => {
     const currentDmMessages = props.dateStats;
     const currentRecipients = props.recipients;
 
-    if (currentDmMessages) {
+    if (currentDmMessages && currentRecipients) {
       const currentDmMessagesValues = Object.values(currentDmMessages);
 
       return {

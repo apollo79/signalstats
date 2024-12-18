@@ -1,9 +1,7 @@
-export type MessageOverview =
-  | {
-      messageDate: Date;
-      fromRecipientId: number;
-    }[]
-  | undefined;
+export type MessageOverview = {
+  messageDate: Date;
+  fromRecipientId: number;
+}[];
 
 export type Recipients = {
   recipientId: number;

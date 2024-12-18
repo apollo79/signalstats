@@ -5,8 +5,8 @@ import type { MessageStats, Recipients } from "~/types";
 import { hourNames } from "~/lib/messages";
 
 export const DmMessagesPerDaytime: Component<{
-  daytimeStats: MessageStats["daytime"];
-  recipients: Recipients;
+  daytimeStats: MessageStats["daytime"] | undefined;
+  recipients: Recipients | undefined;
 }> = (props) => {
   const daytimeChartData: Accessor<ChartData<"bar"> | undefined> = () => {
     const currentMessagesPerHour = props.daytimeStats;

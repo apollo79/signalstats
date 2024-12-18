@@ -1,4 +1,5 @@
 import { createRoot, on, createDeferred } from "solid-js";
+import { serialize, deserialize } from "seroval";
 
 const DATABASE_HASH_PREFIX = "database";
 
@@ -64,10 +65,12 @@ class LocalStorageCacheAdapter {
     this.keys.add(fullKey);
 
     try {
-      localStorage.setItem(fullKey, JSON.stringify(value));
+      localStorage.setItem(fullKey, serialize(value));
     } catch (error: unknown) {
       if (error instanceof DOMException && error.name === "QUOTA_EXCEEDED_ERR") {
         console.error("Storage quota exceeded, not caching new function calls");
+      } else {
+        console.error(error);
       }
     }
   }
@@ -80,7 +83,7 @@ class LocalStorageCacheAdapter {
   get<R>(cacheName: string, key: string): R | undefined {
     const item = localStorage.getItem(this.#createKey(cacheName, key));
     if (item) {
-      return JSON.parse(item) as R;
+      return deserialize(item) as R;
     }
   }
 }

@@ -5,8 +5,8 @@ import { weekdayNames } from "~/lib/messages";
 import type { MessageStats, Recipients } from "~/types";
 
 export const DmMessagesPerWeekday: Component<{
-  weekdayStats: MessageStats["weekday"];
-  recipients: Recipients;
+  weekdayStats: MessageStats["weekday"] | undefined;
+  recipients: Recipients | undefined;
 }> = (props) => {
   const weekdayChartData: Accessor<ChartData<"radar"> | undefined> = () => {
     const currentMessagesPerWeekday = props.weekdayStats;

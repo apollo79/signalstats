@@ -5,8 +5,8 @@ import { monthNames } from "~/lib/messages";
 import type { MessageStats, Recipients } from "~/types";
 
 export const DmMessagesPerMonth: Component<{
-  monthStats: MessageStats["month"];
-  recipients: Recipients;
+  monthStats: MessageStats["month"] | undefined;
+  recipients: Recipients | undefined;
 }> = (props) => {
   const monthChartData: Accessor<ChartData<"radar"> | undefined> = () => {
     const currentMessagesPerMonth = props.monthStats;

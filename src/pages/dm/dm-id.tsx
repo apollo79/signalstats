@@ -1,4 +1,4 @@
-import { type Component, createResource } from "solid-js";
+import { type Component, createMemo, createResource } from "solid-js";
 import type { RouteSectionProps } from "@solidjs/router";
 
 import { dmPartnerRecipientQuery, SELF_ID, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery } from "~/db";
@@ -35,7 +35,7 @@ export const DmId: Component<RouteSectionProps> = (props) => {
     }
   });
 
-  const [dmMessagesOverview] = createResource<MessageOverview>(async () => {
+  const [dmMessagesOverview] = createResource<MessageOverview | undefined>(async () => {
     const dmMessageOverview = await threadSentMessagesOverviewQuery(dmId());
     if (dmMessageOverview) {
       return dmMessageOverview.map((row) => {
@@ -61,16 +61,16 @@ export const DmId: Component<RouteSectionProps> = (props) => {
         },
       ];
     }
-
-    return [
-      {
-        recipientId: SELF_ID,
-        name: "You",
-      },
-    ];
   };
 
-  const dmMessageStats = createMessageStatsSources(dmMessagesOverview, recipients);
+  const dmMessageStats = createMemo(() => {
+    const currentDmMessagesOverview = dmMessagesOverview();
+    const currentRecipients = recipients();
+
+    if (currentDmMessagesOverview && currentRecipients) {
+      return createMessageStatsSources(currentDmMessagesOverview, currentRecipients);
+    }
+  });
 
   return (
     <>
@@ -78,26 +78,26 @@ export const DmId: Component<RouteSectionProps> = (props) => {
       <div class="flex flex-col items-center">
         <Heading level={1}>DM with {dmPartner()?.name}</Heading>
         <Heading level={2}>Chat timeline</Heading>
-        <DmMessagesPerDate dateStats={dmMessageStats().date} recipients={recipients()} />
+        <DmMessagesPerDate dateStats={dmMessageStats()?.date} recipients={recipients()} />
         <DmOverview messages={dmMessagesOverview()} />
         <Heading level={2}>Messages per</Heading>
 
         <Grid cols={1} colsMd={2} class="gap-x-16 gap-y-16">
           <div>
             <Heading level={3}>Person</Heading>
-            <DmMessagesPerRecipient personStats={dmMessageStats().person} recipients={recipients()} />
+            <DmMessagesPerRecipient personStats={dmMessageStats()?.person} recipients={recipients()} />
           </div>
           <div>
             <Heading level={3}>Daytime</Heading>
-            <DmMessagesPerDaytime daytimeStats={dmMessageStats().daytime} recipients={recipients()} />
+            <DmMessagesPerDaytime daytimeStats={dmMessageStats()?.daytime} recipients={recipients()} />
           </div>
           <div>
             <Heading level={3}>Month</Heading>
-            <DmMessagesPerMonth monthStats={dmMessageStats().month} recipients={recipients()} />
+            <DmMessagesPerMonth monthStats={dmMessageStats()?.month} recipients={recipients()} />
           </div>
           <div>
             <Heading level={3}>Weekday</Heading>
-            <DmMessagesPerWeekday weekdayStats={dmMessageStats().weekday} recipients={recipients()} />
+            <DmMessagesPerWeekday weekdayStats={dmMessageStats()?.weekday} recipients={recipients()} />
           </div>
         </Grid>
         <Heading level={2}>Word cloud</Heading>

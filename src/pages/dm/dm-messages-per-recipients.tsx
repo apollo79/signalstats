@@ -4,8 +4,8 @@ import { PieChart } from "~/components/ui/charts";
 import type { MessageStats, Recipients } from "~/types";
 
 export const DmMessagesPerRecipient: Component<{
-  personStats: MessageStats["person"];
-  recipients: Recipients;
+  personStats: MessageStats["person"] | undefined;
+  recipients: Recipients | undefined;
 }> = (props) => {
   const recipientChartData: Accessor<ChartData<"pie"> | undefined> = () => {
     const currentMessagesPerRecipient = props.personStats;

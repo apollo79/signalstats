@@ -4,6 +4,7 @@ import { type RouteSectionProps, useNavigate } from "@solidjs/router";
 import { setDb, SQL } from "~/db";
 import { Portal } from "solid-js/web";
 import { Flex } from "~/components/ui/flex";
+import { Title } from "@solidjs/meta";
 
 export const Home: Component<RouteSectionProps> = () => {
   const [isLoadingDb, setIsLoadingDb] = createSignal(false);
@@ -38,6 +39,7 @@ export const Home: Component<RouteSectionProps> = () => {
           </Flex>
         </Show>
       </Portal>
+      <Title>Signal stats</Title>
       <div>
         <input type="file" accept=".sqlite" onChange={onFileChange}></input>
       </div>
