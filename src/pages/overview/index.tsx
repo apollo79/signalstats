@@ -10,8 +10,8 @@ import { Title } from "@solidjs/meta";
 export const Overview: Component<RouteSectionProps> = () => {
   const [allSelfSentMessagesCount] = createResource(() => overallSentMessagesQuery(SELF_ID));
 
-  const [roomOverview] = createResource<RoomOverview[]>(async () => {
-    return (await allThreadsOverviewQuery()).rows.map((row) => {
+  const [roomOverview] = createResource<RoomOverview[] | undefined>(async () => {
+    return (await allThreadsOverviewQuery())?.map((row) => {
       const isGroup = row.title !== null;
 
       let name = "";

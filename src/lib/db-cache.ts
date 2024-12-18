@@ -142,7 +142,9 @@ export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?:
     isPromise = promisified == newValue;
 
     void promisified.then((result) => {
-      cache.set(cacheName, cacheKey, result);
+      if (result !== undefined) {
+        cache.set(cacheName, cacheKey, result);
+      }
     });
 
     return newValue;

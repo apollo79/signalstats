@@ -57,8 +57,7 @@ export const createMessageStatsSources = (
         person[message.fromRecipientId] += 1;
 
         // increment the message count of the message's month for this recipient
-        // months are an array from 0 - 11
-        month[messageDate.getMonth() - 1][message.fromRecipientId] += 1;
+        month[messageDate.getMonth()][message.fromRecipientId] += 1;
 
         // biome-ignore lint/style/noNonNullAssertion: <explanation>
         const dateStatsEntry = date.find(({ date }) => isSameDay(date, messageDate))!;
