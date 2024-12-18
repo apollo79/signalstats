@@ -1,4 +1,4 @@
-import { createEffect, Show, type Accessor, type Component } from "solid-js";
+import { Show, type Accessor, type Component } from "solid-js";
 import type { ChartData } from "chart.js";
 import { LineChart } from "~/components/ui/charts";
 import type { MessageStats, Recipients } from "~/types";

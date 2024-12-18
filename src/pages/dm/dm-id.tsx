@@ -1,4 +1,4 @@
-import { type Component, createResource, Show } from "solid-js";
+import { type Component, createResource } from "solid-js";
 import type { RouteSectionProps } from "@solidjs/router";
 
 import { dmPartnerRecipientQuery, SELF_ID, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery } from "~/db";

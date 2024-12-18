@@ -1,9 +1,12 @@
-import { type Component, type JSX } from "solid-js";
+import { createSignal, Show, type Component, type JSX } from "solid-js";
 import { type RouteSectionProps, useNavigate } from "@solidjs/router";
 
 import { setDb, SQL } from "~/db";
+import { Portal } from "solid-js/web";
+import { Flex } from "~/components/ui/flex";
 
 export const Home: Component<RouteSectionProps> = () => {
+  const [isLoadingDb, setIsLoadingDb] = createSignal(false);
   const navigate = useNavigate();
 
   const onFileChange: JSX.ChangeEventHandler<HTMLInputElement, Event> = (event) => {
@@ -12,9 +15,14 @@ export const Home: Component<RouteSectionProps> = () => {
       const reader = new FileReader();
 
       reader.addEventListener("load", () => {
-        const Uints = new Uint8Array(reader.result as ArrayBuffer);
-        setDb(new SQL.Database(Uints));
-        navigate("/overview");
+        setIsLoadingDb(true);
+
+        setTimeout(() => {
+          const Uints = new Uint8Array(reader.result as ArrayBuffer);
+          setDb(new SQL.Database(Uints));
+          setIsLoadingDb(false);
+          navigate("/overview");
+        }, 10);
       });
 
       reader.readAsArrayBuffer(file);
@@ -22,9 +30,18 @@ export const Home: Component<RouteSectionProps> = () => {
   };
 
   return (
-    <div>
-      <input type="file" accept=".sqlite" onChange={onFileChange}></input>
-    </div>
+    <>
+      <Portal>
+        <Show when={isLoadingDb()}>
+          <Flex alignItems="center" justifyContent="center" class="fixed inset-0 backdrop-blur-lg backdrop-filter">
+            <p class="font-bold text-2xl">Loading database</p>
+          </Flex>
+        </Show>
+      </Portal>
+      <div>
+        <input type="file" accept=".sqlite" onChange={onFileChange}></input>
+      </div>
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
 export const getNameFromRecipient = (
   joinedNickname: string | null,
   joinedSystemName: string | null,
-  joinedProfileName: string | null
+  joinedProfileName: string | null,
 ) => {
   let name = "Could not determine name";
 

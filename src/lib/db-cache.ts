@@ -36,9 +36,7 @@ createRoot(() => {
     createDeferred(
       on(db, (currentDb) => {
         if (currentDb) {
-          const newHash = hashString(
-            new TextDecoder().decode(currentDb.export())
-          ).toString();
+          const newHash = hashString(new TextDecoder().decode(currentDb.export())).toString();
 
           const oldHash = localStorage.getItem(HASH_STORE_KEY);
 
@@ -48,15 +46,13 @@ createRoot(() => {
             localStorage.setItem(HASH_STORE_KEY, newHash);
           }
         }
-      })
+      }),
     );
   });
 });
 
 class LocalStorageCacheAdapter {
-  keys = new Set<string>(
-    Object.keys(localStorage).filter((key) => key.startsWith(this.prefix))
-  );
+  keys = new Set<string>(Object.keys(localStorage).filter((key) => key.startsWith(this.prefix)));
   prefix = "database";
 
   #createKey(cacheName: string, key: string): string {
@@ -70,10 +66,7 @@ class LocalStorageCacheAdapter {
     try {
       localStorage.setItem(fullKey, JSON.stringify(value));
     } catch (error: unknown) {
-      if (
-        error instanceof DOMException &&
-        error.name === "QUOTA_EXCEEDED_ERR"
-      ) {
+      if (error instanceof DOMException && error.name === "QUOTA_EXCEEDED_ERR") {
         console.error("Storage quota exceeded, not caching new function calls");
       }
     }
@@ -121,10 +114,7 @@ const createHashKey = (...args: unknown[]) => {
   return hashString(stringToHash);
 };
 
-export const cached = <T extends unknown[], R, TT>(
-  fn: (...args: T) => R,
-  self?: ThisType<TT>
-): ((...args: T) => R) => {
+export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?: ThisType<TT>): ((...args: T) => R) => {
   const cacheName = hashString(fn.toString()).toString();
 
   // important to return a promise on follow-up calls even if the data is immediately available

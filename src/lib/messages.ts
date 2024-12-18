@@ -1,6 +1,5 @@
-import { createEffect, createMemo, on, type Accessor } from "solid-js";
+import { createMemo, type Accessor } from "solid-js";
 import { getDateList, getHourList, getMonthList, getWeekdayList } from "./date";
-import { cached } from "./db-cache";
 import type { MessageOverview, MessageStats, Recipients } from "~/types";
 import { isSameDay } from "date-fns";
 
@@ -18,10 +17,9 @@ const initialWeekdayMap = [...weekdayNames.keys()];
 
 export const createMessageStatsSources = (
   messageOverview: Accessor<MessageOverview>,
-  recipients: Accessor<Recipients>
+  recipients: Accessor<Recipients>,
 ) => {
-  const initialRecipientMap = () =>
-    Object.fromEntries(recipients().map(({ recipientId }) => [recipientId, 0]));
+  const initialRecipientMap = () => Object.fromEntries(recipients().map(({ recipientId }) => [recipientId, 0]));
 
   const dateList = () => {
     const currentDmMessagesOverview = messageOverview();
@@ -63,9 +61,7 @@ export const createMessageStatsSources = (
         month[messageDate.getMonth() - 1][message.fromRecipientId] += 1;
 
         // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        const dateStatsEntry = date.find(({ date }) =>
-          isSameDay(date, messageDate)
-        )!;
+        const dateStatsEntry = date.find(({ date }) => isSameDay(date, messageDate))!;
 
         // increment the message count of the message's date for this recipient
         dateStatsEntry[message.fromRecipientId] += 1;

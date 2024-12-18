@@ -10,18 +10,14 @@ export const getDistanceBetweenDatesInDays = (a: Date, b: Date) => {
 };
 
 // https://dev.to/pretaporter/how-to-get-month-list-in-your-language-4lfb
-export const getMonthList = (
-  locales?: string | string[],
-  format: "long" | "short" = "long"
-): string[] => {
+export const getMonthList = (locales?: string | string[], format: "long" | "short" = "long"): string[] => {
   const year = new Date().getFullYear(); // 2020
   const monthList = [...Array(12).keys()]; // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   const formatter = new Intl.DateTimeFormat(locales, {
     month: format,
   });
 
-  const getMonthName = (monthIndex: number) =>
-    formatter.format(new Date(year, monthIndex));
+  const getMonthName = (monthIndex: number) => formatter.format(new Date(year, monthIndex));
 
   return monthList.map(getMonthName);
 };
@@ -48,10 +44,7 @@ export const getDateList = (startDate: Date, endDate: Date): Date[] => {
   return dateArray;
 };
 
-export const getHourList = (
-  locales?: string | string[],
-  format: "numeric" | "2-digit" = "numeric"
-): string[] => {
+export const getHourList = (locales?: string | string[], format: "numeric" | "2-digit" = "numeric"): string[] => {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -63,16 +56,12 @@ export const getHourList = (
     hourCycle: "h11",
   });
 
-  const getHourName = (hourIndex: number) =>
-    formatter.format(new Date(year, month, day, hourIndex));
+  const getHourName = (hourIndex: number) => formatter.format(new Date(year, month, day, hourIndex));
 
   return hourList.map(getHourName);
 };
 
-export const getWeekdayList = (
-  locales?: string | string[],
-  format: "long" | "short" | "narrow" = "long"
-): string[] => {
+export const getWeekdayList = (locales?: string | string[], format: "long" | "short" | "narrow" = "long"): string[] => {
   const monday = new Date();
   // set day to monday (w/o +1 it would be sunday)
   monday.setDate(monday.getDate() - monday.getDay() + 1);
@@ -86,8 +75,7 @@ export const getWeekdayList = (
     weekday: format,
   });
 
-  const getWeekDayName = (weekDayIndex: number) =>
-    formatter.format(new Date(year, month, mondayDate + weekDayIndex));
+  const getWeekDayName = (weekDayIndex: number) => formatter.format(new Date(year, month, mondayDate + weekDayIndex));
 
   return hourList.map(getWeekDayName);
 };
