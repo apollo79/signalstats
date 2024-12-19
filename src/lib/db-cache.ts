@@ -1,5 +1,7 @@
-import { createRoot, on, createDeferred } from "solid-js";
+import { on, createSignal, createEffect, createRoot, createMemo } from "solid-js";
 import { serialize, deserialize } from "seroval";
+import { createSignaledWorker } from "@solid-primitives/workers";
+import { db } from "~/db";
 
 const DATABASE_HASH_PREFIX = "database";
 
@@ -30,31 +32,48 @@ const hashString = (str: string) => {
 
 const HASH_STORE_KEY = `${DATABASE_HASH_PREFIX}_hash`;
 
-// cannot import `db` the normal way because this file is imported in ~/db.ts before the initialisation of `db` has happened
 createRoot(() => {
-  void import("~/db").then(({ db }) => {
-    // we use create deferred because hasing can take very long and we don't want to block the mainthread
-    createDeferred(
-      on(db, (currentDb) => {
-        if (currentDb) {
-          const newHash = hashString(new TextDecoder().decode(currentDb.export())).toString();
+  const [dbHash, setDbHash] = createSignal(localStorage.getItem(HASH_STORE_KEY));
 
-          const oldHash = localStorage.getItem(HASH_STORE_KEY);
-
-          if (newHash !== oldHash) {
-            clearDbCache();
-
-            localStorage.setItem(HASH_STORE_KEY, newHash);
-          }
+  // offloaded because this can take a long time (>1s easily) and would block the mainthread
+  createSignaledWorker({
+    input: db,
+    output: setDbHash,
+    func: function hashDb(currentDb: ReturnType<typeof db>) {
+      const hashString = (str: string) => {
+        let hash = 0,
+          i,
+          chr;
+        if (str.length === 0) return hash;
+        for (i = 0; i < str.length; i++) {
+          chr = str.charCodeAt(i);
+          hash = (hash << 5) - hash + chr;
+          hash |= 0; // Convert to 32bit integer
         }
-      }),
-    );
+        return hash;
+      };
+
+      if (currentDb?.export) {
+        return hashString(new TextDecoder().decode(currentDb.export())).toString();
+      }
+    },
+  });
+
+  createEffect(() => {
+    on(dbHash, (currentDbHash) => {
+      if (currentDbHash) {
+        clearDbCache();
+
+        localStorage.setItem(HASH_STORE_KEY, currentDbHash);
+      }
+    });
   });
 });
 
 class LocalStorageCacheAdapter {
   keys = new Set<string>(Object.keys(localStorage).filter((key) => key.startsWith(this.prefix)));
   prefix = "database";
+  #dbLoaded = createMemo(() => !!db());
 
   #createKey(cacheName: string, key: string): string {
     return `${this.prefix}-${cacheName}-${key}`;
@@ -76,14 +95,24 @@ class LocalStorageCacheAdapter {
   }
 
   has(cacheName: string, key: string): boolean {
-    return this.keys.has(this.#createKey(cacheName, key));
+    if (this.#dbLoaded()) {
+      return this.keys.has(this.#createKey(cacheName, key));
+    }
+
+    console.info("No database loaded");
+
+    return false;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   get<R>(cacheName: string, key: string): R | undefined {
-    const item = localStorage.getItem(this.#createKey(cacheName, key));
-    if (item) {
-      return deserialize(item) as R;
+    if (this.#dbLoaded()) {
+      const item = localStorage.getItem(this.#createKey(cacheName, key));
+
+      if (item) {
+        return deserialize(item) as R;
+      }
+    } else {
+      console.info("No database loaded");
     }
   }
 }

@@ -1,7 +1,7 @@
 import type { ChartData } from "chart.js";
 import { Show, type Accessor, type Component } from "solid-js";
 import { WordCloudChart } from "~/components/ui/charts";
-import type { threadMostUsedWordsQuery } from "~/db";
+import type { threadMostUsedWordsQuery } from "~/db-queries";
 
 const maxWordSize = 100;
 

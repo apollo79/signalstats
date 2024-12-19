@@ -1,7 +1,7 @@
-import { type Component, createMemo, createResource } from "solid-js";
-import type { RouteSectionProps } from "@solidjs/router";
+import { Suspense, type Component } from "solid-js";
+import { createAsync, type RoutePreloadFunc, type RouteSectionProps } from "@solidjs/router";
 
-import { dmPartnerRecipientQuery, SELF_ID, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery } from "~/db";
+import { dmPartnerRecipientQuery, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery } from "~/db-queries";
 import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
 import { Heading } from "~/components/ui/heading";
 import { Grid } from "~/components/ui/grid";
@@ -15,13 +15,13 @@ import { DmMessagesPerRecipient } from "./dm-messages-per-recipients";
 import { DmMessagesPerWeekday } from "./dm-messages-per-weekday";
 import type { MessageOverview } from "~/types";
 import { createMessageStatsSources } from "~/lib/messages";
+import { SELF_ID } from "~/db";
+import { Flex } from "~/components/ui/flex";
 
-export const DmId: Component<RouteSectionProps> = (props) => {
-  const dmId = () => Number(props.params.dmid);
-
+const getDmIdData = (dmId: number) => {
   // the other person in the chat with name and id
-  const [dmPartner] = createResource(async () => {
-    const dmPartner = await dmPartnerRecipientQuery(dmId());
+  const dmPartner = createAsync(async () => {
+    const dmPartner = await dmPartnerRecipientQuery(dmId);
 
     if (dmPartner) {
       return {
@@ -35,8 +35,8 @@ export const DmId: Component<RouteSectionProps> = (props) => {
     }
   });
 
-  const [dmMessagesOverview] = createResource<MessageOverview | undefined>(async () => {
-    const dmMessageOverview = await threadSentMessagesOverviewQuery(dmId());
+  const dmMessagesOverview = createAsync<MessageOverview | undefined>(async () => {
+    const dmMessageOverview = await threadSentMessagesOverviewQuery(dmId);
     if (dmMessageOverview) {
       return dmMessageOverview.map((row) => {
         return {
@@ -47,7 +47,7 @@ export const DmId: Component<RouteSectionProps> = (props) => {
     }
   });
 
-  const [mostUsedWordCounts] = createResource(async () => threadMostUsedWordsQuery(dmId(), 300));
+  const mostUsedWordCounts = createAsync(async () => threadMostUsedWordsQuery(dmId, 300));
 
   const recipients = () => {
     const currentDmPartner = dmPartner();
@@ -63,14 +63,32 @@ export const DmId: Component<RouteSectionProps> = (props) => {
     }
   };
 
-  const dmMessageStats = createMemo(() => {
+  const dmMessageStats = createAsync(async () => {
     const currentDmMessagesOverview = dmMessagesOverview();
     const currentRecipients = recipients();
 
     if (currentDmMessagesOverview && currentRecipients) {
-      return createMessageStatsSources(currentDmMessagesOverview, currentRecipients);
+      return await createMessageStatsSources(dmId, currentDmMessagesOverview, currentRecipients);
     }
   });
+
+  return {
+    dmPartner,
+    dmMessagesOverview,
+    mostUsedWordCounts,
+    recipients,
+    dmMessageStats,
+  };
+};
+
+export const preloadDmId: RoutePreloadFunc = (props) => {
+  void getDmIdData(Number(props.params.dmid));
+};
+
+export const DmId: Component<RouteSectionProps> = (props) => {
+  const { dmPartner, dmMessagesOverview, mostUsedWordCounts, recipients, dmMessageStats } = getDmIdData(
+    Number(props.params.dmid),
+  );
 
   return (
     <>
@@ -78,30 +96,54 @@ export const DmId: Component<RouteSectionProps> = (props) => {
       <div class="flex flex-col items-center">
         <Heading level={1}>DM with {dmPartner()?.name}</Heading>
         <Heading level={2}>Chat timeline</Heading>
-        <DmMessagesPerDate dateStats={dmMessageStats()?.date} recipients={recipients()} />
+        <Suspense
+          fallback={
+            <Flex alignItems="center" justifyContent="center" class="h-64">
+              <p class="text-4xl">Loading...</p>
+            </Flex>
+          }
+        >
+          <DmMessagesPerDate dateStats={dmMessageStats()?.date} recipients={recipients()} />
+        </Suspense>
         <DmOverview messages={dmMessagesOverview()} />
         <Heading level={2}>Messages per</Heading>
 
-        <Grid cols={1} colsMd={2} class="gap-x-16 gap-y-16">
-          <div>
-            <Heading level={3}>Person</Heading>
-            <DmMessagesPerRecipient personStats={dmMessageStats()?.person} recipients={recipients()} />
-          </div>
-          <div>
-            <Heading level={3}>Daytime</Heading>
-            <DmMessagesPerDaytime daytimeStats={dmMessageStats()?.daytime} recipients={recipients()} />
-          </div>
-          <div>
-            <Heading level={3}>Month</Heading>
-            <DmMessagesPerMonth monthStats={dmMessageStats()?.month} recipients={recipients()} />
-          </div>
-          <div>
-            <Heading level={3}>Weekday</Heading>
-            <DmMessagesPerWeekday weekdayStats={dmMessageStats()?.weekday} recipients={recipients()} />
-          </div>
-        </Grid>
+        <Suspense
+          fallback={
+            <Flex alignItems="center" justifyContent="center" class="h-64">
+              <p class="text-4xl">Loading...</p>
+            </Flex>
+          }
+        >
+          <Grid cols={1} colsMd={2} class="gap-x-16 gap-y-16">
+            <div>
+              <Heading level={3}>Person</Heading>
+              <DmMessagesPerRecipient personStats={dmMessageStats()?.person} recipients={recipients()} />
+            </div>
+            <div>
+              <Heading level={3}>Daytime</Heading>
+              <DmMessagesPerDaytime daytimeStats={dmMessageStats()?.daytime} recipients={recipients()} />
+            </div>
+            <div>
+              <Heading level={3}>Month</Heading>
+              <DmMessagesPerMonth monthStats={dmMessageStats()?.month} recipients={recipients()} />
+            </div>
+            <div>
+              <Heading level={3}>Weekday</Heading>
+              <DmMessagesPerWeekday weekdayStats={dmMessageStats()?.weekday} recipients={recipients()} />
+            </div>
+          </Grid>
+        </Suspense>
         <Heading level={2}>Word cloud</Heading>
-        <DmWordCloud wordCounts={mostUsedWordCounts()} />
+        <Suspense
+          fallback={
+            <Flex alignItems="center" justifyContent="center" class="h-64">
+              <p class="text-4xl">Loading...</p>
+            </Flex>
+          }
+        >
+          <DmWordCloud wordCounts={mostUsedWordCounts()} />
+        </Suspense>
       </div>
     </>
   );

@@ -1,5 +1,5 @@
 import { type Component, createSignal, For, Match, Show, Switch } from "solid-js";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, usePreloadRoute } from "@solidjs/router";
 
 import {
   type ColumnFiltersState,
@@ -191,6 +191,8 @@ interface OverviewTableProps {
 }
 
 export const OverviewTable = (props: OverviewTableProps) => {
+  const preload = usePreloadRoute();
+
   const [sorting, setSorting] = createSignal<SortingState>([
     {
       id: "messageCount",
@@ -314,6 +316,26 @@ export const OverviewTable = (props: OverviewTableProps) => {
                 <TableRow
                   class="cursor-pointer [&:last-of-type>td:first-of-type]:rounded-bl-md [&:last-of-type>td:last-of-type]:rounded-br-md"
                   data-state={row.getIsSelected() && "selected"}
+                  onPointerEnter={(event) => {
+                    const threadId = row.original.threadId;
+                    const isGroup = row.original.isGroup;
+
+                    const preloadTimeout = setTimeout(() => {
+                      preload(`/${isGroup ? "group" : "dm"}/${threadId.toString()}`, {
+                        preloadData: true,
+                      });
+                    }, 20);
+
+                    event.currentTarget.addEventListener(
+                      "pointerout",
+                      () => {
+                        clearTimeout(preloadTimeout);
+                      },
+                      {
+                        once: true,
+                      },
+                    );
+                  }}
                   onClick={() => {
                     const threadId = row.original.threadId;
                     const isGroup = row.original.isGroup;

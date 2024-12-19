@@ -1,9 +1,11 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
-import { Router } from "@solidjs/router";
+import { Router, useNavigate } from "@solidjs/router";
 import { MetaProvider } from "@solidjs/meta";
 
 import App from "./App";
+import { createEffect } from "solid-js";
+import { db } from "./db";
 
 const root = document.getElementById("root");
 
@@ -18,7 +20,20 @@ if (root) {
     () => (
       <div class="mx-auto max-w-screen-2xl">
         <MetaProvider>
-          <Router>
+          <Router
+            root={(props) => {
+              const navigate = useNavigate();
+              const { pathname } = props.location;
+
+              createEffect(() => {
+                if (!db() && pathname !== "/") {
+                  navigate("/");
+                }
+              });
+
+              return props.children;
+            }}
+          >
             <App />
           </Router>
         </MetaProvider>

@@ -1,10 +1,10 @@
 import { createSignal, Show, type Component, type JSX } from "solid-js";
 import { type RouteSectionProps, useNavigate } from "@solidjs/router";
 
-import { setDb, SQL } from "~/db";
 import { Portal } from "solid-js/web";
 import { Flex } from "~/components/ui/flex";
 import { Title } from "@solidjs/meta";
+import { setDb, SQL } from "~/db";
 
 export const Home: Component<RouteSectionProps> = () => {
   const [isLoadingDb, setIsLoadingDb] = createSignal(false);

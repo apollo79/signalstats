@@ -1,11 +1,12 @@
 import { type Component, createResource, Show } from "solid-js";
 import type { RouteSectionProps } from "@solidjs/router";
 
-import { allThreadsOverviewQuery, overallSentMessagesQuery, SELF_ID } from "~/db";
+import { allThreadsOverviewQuery, overallSentMessagesQuery } from "~/db-queries";
 
 import { OverviewTable, type RoomOverview } from "./overview-table";
 import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
 import { Title } from "@solidjs/meta";
+import { SELF_ID } from "~/db";
 
 export const Overview: Component<RouteSectionProps> = () => {
   const [allSelfSentMessagesCount] = createResource(() => overallSentMessagesQuery(SELF_ID));
