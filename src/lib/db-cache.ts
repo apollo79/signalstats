@@ -47,12 +47,12 @@ class LocalStorageCacheAdapter {
     return `${this.prefix}-${cacheName}-${key}`;
   }
 
-  set(cacheName: string, key: string, value: unknown) {
+  set(cacheName: string, key: string, value: unknown, isPromise = false) {
     const fullKey = this.#createKey(cacheName, key);
     this.keys.add(fullKey);
 
     try {
-      localStorage.setItem(fullKey, serialize(value));
+      localStorage.setItem(fullKey, serialize({ isPromise, value }));
     } catch (error: unknown) {
       if (
         error instanceof DOMException &&
@@ -75,12 +75,23 @@ class LocalStorageCacheAdapter {
     return false;
   }
 
-  get<R>(cacheName: string, key: string): R | undefined {
+  get<R>(
+    cacheName: string,
+    key: string,
+  ):
+    | {
+        isPromise: boolean;
+        value: R;
+      }
+    | undefined {
     if (this.#dbLoaded()) {
       const item = localStorage.getItem(this.#createKey(cacheName, key));
 
       if (item) {
-        return deserialize(item) as R;
+        return deserialize(item) as {
+          isPromise: boolean;
+          value: R;
+        };
       }
     } else {
       console.info("No database loaded");
@@ -123,16 +134,17 @@ export const cached = <T extends unknown[], R, TT>(
 ): ((...args: T) => R) => {
   const cacheName = hashString(fn.toString()).toString();
 
-  // important to return a promise on follow-up calls even if the data is immediately available
-  let isPromise: boolean;
-
   return (...args: T) => {
     const cacheKey = createHashKey(...args).toString();
 
     const cachedValue = cache.get<R>(cacheName, cacheKey);
 
     if (cachedValue) {
-      return (isPromise ? Promise.resolve(cachedValue) : cachedValue) as R;
+      return (
+        cachedValue.isPromise
+          ? Promise.resolve(cachedValue.value)
+          : cachedValue.value
+      ) as R;
     }
 
     let newValue: R;
@@ -145,11 +157,11 @@ export const cached = <T extends unknown[], R, TT>(
 
     const promisified = Promise.resolve(newValue);
 
-    isPromise = promisified == newValue;
+    const isPromise = promisified == newValue;
 
     void promisified.then((result) => {
       if (result !== undefined) {
-        cache.set(cacheName, cacheKey, result);
+        cache.set(cacheName, cacheKey, result, isPromise);
       }
     });
 

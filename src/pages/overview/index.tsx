@@ -12,8 +12,6 @@ import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
 import { OverviewTable, type RoomOverview } from "./overview-table";
 
 export const Overview: Component<RouteSectionProps> = () => {
-  console.log(overallSentMessagesQuery(SELF_ID));
-
   const [allSelfSentMessagesCount] = createResource(() =>
     overallSentMessagesQuery(SELF_ID),
   );
