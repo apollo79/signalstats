@@ -1,3 +1,0 @@
-[submodule "signal-decrypt-backup-wasm"]
-	path = signal-decrypt-backup-wasm
-	url = https://git.duskflower.dev/duskflower/signal-decrypt-backup-wasm
