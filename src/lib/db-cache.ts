@@ -1,9 +1,9 @@
-import { on, createSignal, createEffect, createRoot, createMemo } from "solid-js";
-import { serialize, deserialize } from "seroval";
-import { createSignaledWorker } from "@solid-primitives/workers";
-import { db } from "~/db";
+import { deserialize, serialize } from "seroval";
+import { createEffect, createMemo, createRoot, on } from "solid-js";
+import { dbHash } from "~/db";
+import { hashString } from "./hash";
 
-const DATABASE_HASH_PREFIX = "database";
+export const DATABASE_HASH_PREFIX = "database";
 
 // clear the cache on new session so that selecting a different database does not result in wrong cache entries
 const clearDbCache = () => {
@@ -16,64 +16,32 @@ const clearDbCache = () => {
   }
 };
 
-// https://stackoverflow.com/a/7616484
-const hashString = (str: string) => {
-  let hash = 0,
-    i,
-    chr;
-  if (str.length === 0) return hash;
-  for (i = 0; i < str.length; i++) {
-    chr = str.charCodeAt(i);
-    hash = (hash << 5) - hash + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
-
-const HASH_STORE_KEY = `${DATABASE_HASH_PREFIX}_hash`;
+let prevDbHash = dbHash();
 
 createRoot(() => {
-  const [dbHash, setDbHash] = createSignal(localStorage.getItem(HASH_STORE_KEY));
-
-  // offloaded because this can take a long time (>1s easily) and would block the mainthread
-  createSignaledWorker({
-    input: db,
-    output: setDbHash,
-    func: function hashDb(currentDb: ReturnType<typeof db>) {
-      const hashString = (str: string) => {
-        let hash = 0,
-          i,
-          chr;
-        if (str.length === 0) return hash;
-        for (i = 0; i < str.length; i++) {
-          chr = str.charCodeAt(i);
-          hash = (hash << 5) - hash + chr;
-          hash |= 0; // Convert to 32bit integer
-        }
-        return hash;
-      };
-
-      if (currentDb?.export) {
-        return hashString(new TextDecoder().decode(currentDb.export())).toString();
-      }
-    },
-  });
-
   createEffect(() => {
-    on(dbHash, (currentDbHash) => {
-      if (currentDbHash) {
-        clearDbCache();
-
-        localStorage.setItem(HASH_STORE_KEY, currentDbHash);
-      }
-    });
+    on(
+      dbHash,
+      (currentDbHash) => {
+        if (currentDbHash && currentDbHash !== prevDbHash) {
+          prevDbHash = currentDbHash;
+          clearDbCache();
+        }
+      },
+      {
+        defer: true,
+      },
+    );
   });
 });
 
 class LocalStorageCacheAdapter {
-  keys = new Set<string>(Object.keys(localStorage).filter((key) => key.startsWith(this.prefix)));
+  keys = new Set<string>(
+    Object.keys(localStorage).filter((key) => key.startsWith(this.prefix)),
+  );
   prefix = "database";
-  #dbLoaded = createMemo(() => !!db());
+  // TODO: real way of detecting if the db is loaded, on loading the db and opfs (if persisted db?)
+  #dbLoaded = createMemo(() => !!dbHash());
 
   #createKey(cacheName: string, key: string): string {
     return `${this.prefix}-${cacheName}-${key}`;
@@ -86,7 +54,10 @@ class LocalStorageCacheAdapter {
     try {
       localStorage.setItem(fullKey, serialize(value));
     } catch (error: unknown) {
-      if (error instanceof DOMException && error.name === "QUOTA_EXCEEDED_ERR") {
+      if (
+        error instanceof DOMException &&
+        error.name === "QUOTA_EXCEEDED_ERR"
+      ) {
         console.error("Storage quota exceeded, not caching new function calls");
       } else {
         console.error(error);
@@ -146,7 +117,10 @@ const createHashKey = (...args: unknown[]) => {
   return hashString(stringToHash);
 };
 
-export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?: ThisType<TT>): ((...args: T) => R) => {
+export const cached = <T extends unknown[], R, TT>(
+  fn: (...args: T) => R,
+  self?: ThisType<TT>,
+): ((...args: T) => R) => {
   const cacheName = hashString(fn.toString()).toString();
 
   // important to return a promise on follow-up calls even if the data is immediately available

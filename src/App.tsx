@@ -1,5 +1,5 @@
-import { type Component } from "solid-js";
 import { Route } from "@solidjs/router";
+import { type Component } from "solid-js";
 import { DmId, GroupId, Home, Overview, preloadDmId } from "./pages";
 
 import "./app.css";

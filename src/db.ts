@@ -1,50 +1,30 @@
-import { createEffect, createMemo, createRoot, createSignal } from "solid-js";
-
+import { makePersisted } from "@solid-primitives/storage";
+import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
 import { Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
-import { SqlJsDialect } from "kysely-wasm";
-import initSqlJS, { type Database } from "sql.js";
-
-import wasmURL from "./assets/sql-wasm.wasm?url";
+import { OfficialWasmDialect } from "kysely-wasm";
+import { createSignal } from "solid-js";
+import workerUrl from "./lib/kysely-official-wasm-worker/worker?url";
 
 export const SELF_ID = 2;
 
-export const SQL = await initSqlJS({
-  locateFile: () => wasmURL,
+const sqlite3 = await sqlite3InitModule({
+  print: console.log,
+  printErr: console.error,
 });
 
-export const [db, setDb] = createSignal<Database | undefined>();
+export const db = new sqlite3.oo1.DB("signal");
 
-const sqlJsDialect = () => {
-  const currentDb = db();
-
-  if (currentDb) {
-    return new SqlJsDialect({
-      database: currentDb,
-    });
-  }
-};
-
-export const kyselyDb = createRoot(() => {
-  createEffect(() => {
-    const currentDb = db();
-
-    if (currentDb) {
-      currentDb.create_function("is_not_empty", (str: string | null) => {
-        return str !== null && str !== "";
-      });
-    }
-  });
-
-  return createMemo(() => {
-    const currentSqlJsDialect = sqlJsDialect();
-
-    if (!currentSqlJsDialect) {
-      return;
-    }
-
-    return new Kysely<DB>({
-      dialect: currentSqlJsDialect,
-    });
-  });
+export const worker = new Worker(workerUrl, {
+  type: "module",
 });
+
+const dialect = new OfficialWasmDialect({
+  database: db,
+});
+
+export const kyselyDb = new Kysely<DB>({
+  dialect,
+});
+
+export const [dbHash, setDbHash] = makePersisted(createSignal<number>());

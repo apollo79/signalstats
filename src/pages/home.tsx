@@ -1,47 +1,90 @@
+import { useNavigate, type RouteSectionProps } from "@solidjs/router";
 import { createSignal, Show, type Component, type JSX } from "solid-js";
-import { type RouteSectionProps, useNavigate } from "@solidjs/router";
 
+import { Title } from "@solidjs/meta";
 import { Portal } from "solid-js/web";
 import { Flex } from "~/components/ui/flex";
-import { Title } from "@solidjs/meta";
-import { setDb, SQL } from "~/db";
+
+import {
+  Progress,
+  ProgressLabel,
+  ProgressValueLabel,
+} from "~/components/ui/progress";
+// import { db } from "~/db";
+import { loadDb } from "~/db-queries";
+import { decryptBackup } from "~/lib/decryptor";
 
 export const Home: Component<RouteSectionProps> = () => {
-  const [isLoadingDb, setIsLoadingDb] = createSignal(false);
+  const [decryptionProgress, setDecryptionProgress] = createSignal<number>();
+  const [isLoadingDatabase, setIsLoadingDatabase] = createSignal(false);
+  const [passphrase, setPassphrase] = createSignal("");
   const navigate = useNavigate();
 
-  const onFileChange: JSX.ChangeEventHandler<HTMLInputElement, Event> = (event) => {
+  const onFileChange: JSX.ChangeEventHandler<HTMLInputElement, Event> = (
+    event,
+  ) => {
     const file = event.currentTarget.files?.[0];
-    if (file) {
-      const reader = new FileReader();
+    const currentPassphrase = passphrase();
 
-      reader.addEventListener("load", () => {
-        setIsLoadingDb(true);
+    if (file && currentPassphrase) {
+      decryptBackup(file, currentPassphrase, setDecryptionProgress)
+        .then((result) => {
+          setDecryptionProgress(undefined);
+          setIsLoadingDatabase(true);
 
-        setTimeout(() => {
-          const Uints = new Uint8Array(reader.result as ArrayBuffer);
-          setDb(new SQL.Database(Uints));
-          setIsLoadingDb(false);
-          navigate("/overview");
-        }, 10);
-      });
+          setTimeout(() => {
+            loadDb(result.database_statements);
 
-      reader.readAsArrayBuffer(file);
+            setIsLoadingDatabase(false);
+
+            navigate("/overview");
+          }, 0);
+        })
+        .catch((error) => {
+          console.error("Decryption failed:", error);
+        });
     }
   };
 
   return (
     <>
       <Portal>
-        <Show when={isLoadingDb()}>
-          <Flex alignItems="center" justifyContent="center" class="fixed inset-0 backdrop-blur-lg backdrop-filter">
+        <Flex
+          flexDirection="col"
+          alignItems="center"
+          justifyContent="center"
+          class="fixed inset-0 backdrop-blur-lg backdrop-filter gap-y-8"
+          classList={{
+            hidden: decryptionProgress() === undefined && !isLoadingDatabase(),
+          }}
+        >
+          <Show when={decryptionProgress() !== undefined}>
+            <p class="font-bold text-2xl">Decrypting database</p>
+            <Progress
+              value={decryptionProgress()}
+              minValue={0}
+              maxValue={100}
+              getValueLabel={({ value }) => `${value}%`}
+              class="w-[300px] space-y-1"
+            >
+              <div class="flex justify-between">
+                <ProgressLabel>Processing...</ProgressLabel>
+                <ProgressValueLabel />
+              </div>
+            </Progress>
+          </Show>
+          <Show when={isLoadingDatabase()}>
             <p class="font-bold text-2xl">Loading database</p>
-          </Flex>
-        </Show>
+          </Show>
+        </Flex>
       </Portal>
       <Title>Signal stats</Title>
       <div>
-        <input type="file" accept=".sqlite" onChange={onFileChange}></input>
+        <input
+          type="password"
+          onChange={(event) => setPassphrase(event.currentTarget.value)}
+        />
+        <input type="file" accept=".backup" onChange={onFileChange} />
       </div>
     </>
   );

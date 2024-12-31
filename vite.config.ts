@@ -1,11 +1,22 @@
 import path from "path";
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
-  plugins: [solidPlugin()],
+  plugins: [solidPlugin(), wasm()],
   server: {
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
     port: 3000,
+  },
+  optimizeDeps: {
+    exclude: [
+      "@duskflower/signal-decrypt-backup-wasm",
+      "@sqlite.org/sqlite-wasm",
+    ],
   },
   build: {
     target: "esnext",
