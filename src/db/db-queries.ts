@@ -1,7 +1,7 @@
 import { sql, type NotNull } from "kysely";
 import { worker, kyselyDb, SELF_ID, DB_FILENAME } from "./db";
 import { cached } from "../lib/db-cache";
-import type { MainToWorkerMsg, WorkerToMainMsg } from "~/lib/kysely-official-wasm-worker/type";
+import type { MainToWorkerMsg, WorkerToMainMsg } from "~/lib/kysely-wasqlite-worker/type";
 
 export const loadDb = (statements: string[], progressCallback?: (percentage: number) => void): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -23,8 +23,8 @@ export const loadDb = (statements: string[], progressCallback?: (percentage: num
       }
     };
 
-    worker.addEventListener("message", endListener);
     worker.addEventListener("message", progressListener);
+    worker.addEventListener("message", endListener);
 
     worker.postMessage([4, DB_FILENAME, true, statements] satisfies MainToWorkerMsg);
   });

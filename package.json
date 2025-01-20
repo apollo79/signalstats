@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "cp ./node_modules/@subframe7536/sqlite-wasm/dist/*.wasm ./src/assets/"
   },
   "license": "MIT",
   "devDependencies": {
@@ -40,6 +41,7 @@
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.3",
     "@sqlite.org/sqlite-wasm": "3.48.0-build2",
+    "@subframe7536/sqlite-wasm": "^0.5.1",
     "@tanstack/solid-table": "^8.20.5",
     "chart.js": "^4.4.7",
     "chartjs-chart-wordcloud": "^4.4.4",
@@ -58,9 +60,6 @@
     "zen-mitt": "^3.0.0"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "biome lint",
-      "biome format"
-    ]
+    "*.{ts,tsx}": ["biome lint", "biome format"]
   }
 }

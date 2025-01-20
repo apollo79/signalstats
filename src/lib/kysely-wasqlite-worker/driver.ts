@@ -1,45 +1,52 @@
 import type { DatabaseConnection, Driver, QueryResult } from "kysely";
-import { CompiledQuery, SelectQueryNode } from "kysely";
 import type { Emitter } from "zen-mitt";
+import type { EventWithError, MainToWorkerMsg, WaSqliteWorkerDialectConfig, WorkerToMainMsg } from "./type";
+import { isModuleWorkerSupport, isOpfsSupported } from "@subframe7536/sqlite-wasm";
+import { CompiledQuery, SelectQueryNode } from "kysely";
 import { mitt } from "zen-mitt";
-import type { EventWithError, MainToWorkerMsg, OfficialWasmWorkerDialectConfig, WorkerToMainMsg } from "./type";
-import workerUrl from "./worker?url";
+import { defaultWasmURL, defaultWorker, parseWorkerOrURL } from "./utils";
 
-export class OfficialWasmWorkerDriver implements Driver {
+export class WaSqliteWorkerDriver implements Driver {
   private worker?: Worker;
   private connection?: DatabaseConnection;
   private connectionMutex = new ConnectionMutex();
   private mitt?: Emitter<EventWithError>;
-  constructor(private config: OfficialWasmWorkerDialectConfig) {}
+  constructor(private config: WaSqliteWorkerDialectConfig) {}
 
   async init(): Promise<void> {
     // try to persist storage, https://web.dev/articles/persistent-storage#request_persistent_storage
     try {
-      if (navigator.storage?.persist && !(await navigator.storage.persisted())) {
+      if (!(await navigator.storage.persisted())) {
         await navigator.storage.persist();
       }
       // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
     } catch {}
 
+    const useOPFS = (this.config.preferOPFS ?? true) ? await isOpfsSupported() : false;
+
     this.mitt = mitt<EventWithError>();
 
-    this.worker =
-      this.config.worker ??
-      new Worker(workerUrl, {
-        type: "module",
-      });
+    this.worker = parseWorkerOrURL(this.config.worker || defaultWorker, useOPFS || isModuleWorkerSupport());
 
-    this.worker.onmessage = ({ data: [type, ...msg] }: MessageEvent<WorkerToMainMsg>) => {
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    this.worker!.onmessage = ({ data: [type, ...msg] }: MessageEvent<WorkerToMainMsg>) => {
       this.mitt?.emit(type, ...msg);
     };
 
-    this.worker.postMessage([0, this.config.fileName, this.config.preferOPFS ?? false] satisfies MainToWorkerMsg);
+    this.worker?.postMessage([
+      0,
+      this.config.fileName,
+      // if use OPFS, wasm should use sync version
+      parseWorkerOrURL(this.config.url ?? defaultWasmURL, !useOPFS) as string,
+      useOPFS,
+    ] satisfies MainToWorkerMsg);
 
     await new Promise<void>((resolve, reject) => {
       this.mitt?.once(0, (_, err) => (err ? reject(err) : resolve()));
     });
 
-    this.connection = new OfficialWasmWorkerConnection(this.worker, this.mitt);
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    this.connection = new WaSqliteWorkerConnection(this.worker!, this.mitt);
     await this.config.onCreateConnection?.(this.connection);
   }
 
@@ -47,7 +54,6 @@ export class OfficialWasmWorkerDriver implements Driver {
     // SQLite only has one single connection. We use a mutex here to wait
     // until the single connection has been released.
     await this.connectionMutex.lock();
-
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
     return this.connection!;
   }
@@ -64,12 +70,9 @@ export class OfficialWasmWorkerDriver implements Driver {
     await connection.executeQuery(CompiledQuery.raw("rollback"));
   }
 
-  releaseConnection(): Promise<void> {
-    return new Promise((resolve) => {
-      this.connectionMutex.unlock();
-
-      resolve();
-    });
+  // biome-ignore lint/suspicious/useAwait: <explanation>
+  async releaseConnection(): Promise<void> {
+    this.connectionMutex.unlock();
   }
 
   async destroy(): Promise<void> {
@@ -116,7 +119,7 @@ class ConnectionMutex {
   }
 }
 
-class OfficialWasmWorkerConnection implements DatabaseConnection {
+class WaSqliteWorkerConnection implements DatabaseConnection {
   readonly worker: Worker;
   readonly mitt?: Emitter<EventWithError>;
   constructor(worker: Worker, mitt?: Emitter<EventWithError>) {
@@ -127,18 +130,20 @@ class OfficialWasmWorkerConnection implements DatabaseConnection {
   async *streamQuery<R>(compiledQuery: CompiledQuery): AsyncIterableIterator<QueryResult<R>> {
     const { parameters, sql, query } = compiledQuery;
     if (!SelectQueryNode.is(query)) {
-      throw new Error("official wasm worker dialect only supports SELECT queries for streaming");
+      throw new Error("WaSqlite dialect only supported SELECT queries");
     }
     this.worker.postMessage([3, sql, parameters] satisfies MainToWorkerMsg);
     let done = false;
     let resolveFn: (value: IteratorResult<QueryResult<R>>) => void;
-    let rejectFn: (reason?: unknown) => void;
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    let rejectFn: (reason?: any) => void;
 
     this.mitt?.on(3 /* data */, (data, err): void => {
       if (err) {
         rejectFn(err);
       } else {
-        resolveFn({ value: { rows: data as R[] }, done: false });
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        resolveFn({ value: { rows: data as any }, done: false });
       }
     });
 
@@ -167,10 +172,8 @@ class OfficialWasmWorkerConnection implements DatabaseConnection {
   }
 
   async executeQuery<R>(compiledQuery: CompiledQuery<unknown>): Promise<QueryResult<R>> {
-    const { sql, parameters, query } = compiledQuery;
-
+    const { parameters, sql, query } = compiledQuery;
     const isSelect = SelectQueryNode.is(query);
-
     this.worker.postMessage([1, isSelect, sql, parameters] satisfies MainToWorkerMsg);
     return new Promise((resolve, reject) => {
       if (!this.mitt) {

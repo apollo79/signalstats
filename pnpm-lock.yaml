@@ -38,6 +38,9 @@ importers:
       '@sqlite.org/sqlite-wasm':
         specifier: 3.48.0-build2
         version: 3.48.0-build2
+      '@subframe7536/sqlite-wasm':
+        specifier: ^0.5.1
+        version: 0.5.1
       '@tanstack/solid-table':
         specifier: ^8.20.5
         version: 8.20.5(solid-js@1.9.4)
@@ -759,6 +762,9 @@ packages:
   '@sqlite.org/sqlite-wasm@3.48.0-build2':
     resolution: {integrity: sha512-nltoBHBbLZmI3VioebwUYaSugTpVcHPvL9rYa0uSkqmiLF0b9ZEM8l9NzoWAHlS6qTMqhGHFtX1lWJ/egyjohQ==}
     hasBin: true
+
+  '@subframe7536/sqlite-wasm@0.5.1':
+    resolution: {integrity: sha512-rRszpnvcT045Jd5HkDMIxaYI95BUl8H07mhYmklNW1CbNjJtiD3dN550lRXElwcDUpTQrdhIdmA9A5QwJ+ct+A==}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -2697,6 +2703,8 @@ snapshots:
       solid-js: 1.9.4
 
   '@sqlite.org/sqlite-wasm@3.48.0-build2': {}
+
+  '@subframe7536/sqlite-wasm@0.5.1': {}
 
   '@swc/helpers@0.5.15':
     dependencies:
