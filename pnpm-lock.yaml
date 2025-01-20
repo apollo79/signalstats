@@ -83,6 +83,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
+      zen-mitt:
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -2118,6 +2121,9 @@ packages:
     resolution: {integrity: sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g==}
     engines: {node: '>=12.20'}
 
+  zen-mitt@3.0.0:
+    resolution: {integrity: sha512-r17ulzFIV/Iq6x35lWKcwbX/EJiDNoFI3hxQ4OY2p2pJrfH6i4IrWwVd/nEIHqMuMR0XHBeYQN9PIx6LfJGoMw==}
+
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
@@ -3969,3 +3975,5 @@ snapshots:
       yargs-parser: 21.1.1
 
   yocto-queue@1.1.1: {}
+
+  zen-mitt@3.0.0: {}

@@ -54,7 +54,8 @@
     "seroval": "^1.2.0",
     "solid-js": "^1.9.4",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zen-mitt": "^3.0.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

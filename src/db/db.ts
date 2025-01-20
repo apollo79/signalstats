@@ -1,21 +1,22 @@
 import { makePersisted } from "@solid-primitives/storage";
-import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
 import { Kysely } from "kysely";
 import type { DB } from "./db-schema";
-import { OfficialWasmDialect } from "kysely-wasm";
 import { createSignal } from "solid-js";
+import { OfficialWasmWorkerDialect } from "~/lib/kysely-official-wasm-worker";
+import wasmWorkerUrl from "~/lib/kysely-official-wasm-worker/worker?url";
 
 export const SELF_ID = 2;
 
-const sqlite3 = await sqlite3InitModule({
-  print: console.log,
-  printErr: console.error,
+export const DB_FILENAME = "signal.sqlite";
+
+export const worker = new Worker(wasmWorkerUrl, {
+  type: "module",
 });
 
-export const db = new sqlite3.oo1.DB("signal");
-
-const dialect = new OfficialWasmDialect({
-  database: db,
+const dialect = new OfficialWasmWorkerDialect({
+  fileName: DB_FILENAME,
+  preferOPFS: true,
+  worker,
 });
 
 export const kyselyDb = new Kysely<DB>({

@@ -1,29 +1,33 @@
 import { sql, type NotNull } from "kysely";
-import { db, kyselyDb, SELF_ID } from "./db";
+import { worker, kyselyDb, SELF_ID, DB_FILENAME } from "./db";
 import { cached } from "../lib/db-cache";
+import type { MainToWorkerMsg, WorkerToMainMsg } from "~/lib/kysely-official-wasm-worker/type";
 
-export const loadDb = (statements: string[], progressCallback?: (percentage: number) => void) => {
-  const length = statements.length;
-  let percentage = 0;
-
-  for (let i = 0; i < length; i++) {
-    const statement = statements[i];
-    const newPercentage = Math.round((i / length) * 100);
-
-    try {
-      if (progressCallback && newPercentage !== percentage) {
-        progressCallback(newPercentage);
-
-        percentage = newPercentage;
+export const loadDb = (statements: string[], progressCallback?: (percentage: number) => void): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const progressListener = ({ data }: MessageEvent<WorkerToMainMsg>) => {
+      if (data[0] === 5) {
+        progressCallback?.(data[1]);
       }
+    };
 
-      db.exec(statement);
-    } catch (e) {
-      throw new Error(`statement failed: ${statement}`, {
-        cause: e,
-      });
-    }
-  }
+    const endListener = ({ data }: MessageEvent<WorkerToMainMsg>) => {
+      if (data[0] === 6) {
+        if (data[2]) {
+          reject(new Error(`statement failed`, { cause: data[2] }));
+        }
+
+        worker.removeEventListener("message", progressListener);
+        worker.removeEventListener("message", endListener);
+        resolve();
+      }
+    };
+
+    worker.addEventListener("message", endListener);
+    worker.addEventListener("message", progressListener);
+
+    worker.postMessage([4, DB_FILENAME, true, statements] satisfies MainToWorkerMsg);
+  });
 };
 
 const allThreadsOverviewQueryRaw = () =>

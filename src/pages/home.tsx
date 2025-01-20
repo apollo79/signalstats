@@ -45,19 +45,17 @@ export const Home: Component<RouteSectionProps> = () => {
 
     if (currentBackupFile && currentPassphrase) {
       decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress)
-        .then((result) => {
+        .then(async (result) => {
           setDecryptionProgress(undefined);
           // setIsLoadingDatabase(true);
           setLoadingProgress(0);
 
-          setTimeout(() => {
-            loadDb(result.database_statements, (newValue) => (console.log(newValue), setLoadingProgress(newValue)));
+          await loadDb(result.database_statements, (newValue) => (console.log(newValue), setLoadingProgress(newValue)));
 
-            // setIsLoadingDatabase(false);
-            setLoadingProgress(undefined);
+          // setIsLoadingDatabase(false);
+          setLoadingProgress(undefined);
 
-            navigate("/overview");
-          }, 0);
+          navigate("/overview");
         })
         .catch((error) => {
           console.error("Decryption failed:", error);
@@ -79,7 +77,7 @@ export const Home: Component<RouteSectionProps> = () => {
           }}
         >
           <Show when={decryptionProgress() !== undefined}>
-            <p class="font-bold text-2xl">Decrypting database</p>
+            <p class="font-bold text-2xl">Decrypting backup</p>
             <Progress
               value={decryptionProgress()}
               minValue={0}
