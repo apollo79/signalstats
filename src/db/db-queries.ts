@@ -1,12 +1,8 @@
 import { sql, type NotNull } from "kysely";
-import { db, kyselyDb, SELF_ID, setDbHash } from "./db";
-import { cached } from "./lib/db-cache";
-import { hashString } from "./lib/hash";
+import { db, kyselyDb, SELF_ID } from "./db";
+import { cached } from "../lib/db-cache";
 
-export const loadDb = (
-  statements: string[],
-  progressCallback?: (percentage: number) => void,
-) => {
+export const loadDb = (statements: string[], progressCallback?: (percentage: number) => void) => {
   const length = statements.length;
   let percentage = 0;
 
@@ -15,20 +11,19 @@ export const loadDb = (
     const newPercentage = Math.round((i / length) * 100);
 
     try {
-      db.exec(statement);
+      if (progressCallback && newPercentage !== percentage) {
+        progressCallback(newPercentage);
 
-      if (newPercentage !== percentage) {
-        progressCallback?.(newPercentage);
         percentage = newPercentage;
       }
+
+      db.exec(statement);
     } catch (e) {
       throw new Error(`statement failed: ${statement}`, {
         cause: e,
       });
     }
   }
-
-  setDbHash(hashString(statements.join()));
 };
 
 const allThreadsOverviewQueryRaw = () =>
@@ -38,15 +33,9 @@ const allThreadsOverviewQueryRaw = () =>
       (eb) =>
         eb
           .selectFrom("message")
-          .select((eb) => [
-            "message.thread_id",
-            eb.fn.countAll().as("message_count"),
-          ])
+          .select((eb) => ["message.thread_id", eb.fn.countAll().as("message_count")])
           .where((eb) => {
-            return eb.and([
-              eb("message.body", "is not", null),
-              eb("message.body", "is not", ""),
-            ]);
+            return eb.and([eb("message.body", "is not", null), eb("message.body", "is not", "")]);
           })
           .groupBy("message.thread_id")
           .as("message"),
@@ -100,9 +89,7 @@ const dmPartnerRecipientQueryRaw = (dmId: number) =>
       "recipient.nickname_joined_name",
     ])
     .innerJoin("thread", "recipient._id", "thread.recipient_id")
-    .where((eb) =>
-      eb.and([eb("thread._id", "=", dmId), eb("recipient._id", "!=", SELF_ID)]),
-    )
+    .where((eb) => eb.and([eb("thread._id", "=", dmId), eb("recipient._id", "!=", SELF_ID)]))
     .$narrowType<{
       _id: number;
     }>()
@@ -113,25 +100,12 @@ export const dmPartnerRecipientQuery = cached(dmPartnerRecipientQueryRaw);
 const threadSentMessagesOverviewQueryRaw = (threadId: number) =>
   kyselyDb
     .selectFrom("message")
-    .select([
-      "from_recipient_id",
-      sql<string>`datetime(date_sent / 1000, 'unixepoch')`.as(
-        "message_datetime",
-      ),
-    ])
+    .select(["from_recipient_id", sql<string>`datetime(date_sent / 1000, 'unixepoch')`.as("message_datetime")])
     .orderBy(["message_datetime"])
-    .where((eb) =>
-      eb.and([
-        eb("body", "is not", null),
-        eb("body", "!=", ""),
-        eb("thread_id", "=", threadId),
-      ]),
-    )
+    .where((eb) => eb.and([eb("body", "is not", null), eb("body", "!=", ""), eb("thread_id", "=", threadId)]))
     .execute();
 
-export const threadSentMessagesOverviewQuery = cached(
-  threadSentMessagesOverviewQueryRaw,
-);
+export const threadSentMessagesOverviewQuery = cached(threadSentMessagesOverviewQueryRaw);
 
 const threadMostUsedWordsQueryRaw = (threadId: number, limit = 10) =>
   kyselyDb
@@ -139,20 +113,16 @@ const threadMostUsedWordsQueryRaw = (threadId: number, limit = 10) =>
       return eb
         .selectFrom("message")
         .select([
-          sql`LOWER(substr(body, 1, instr(body || " ", " ") - 1))`.as("word"),
-          sql`(substr(body, instr(body || " ", " ") + 1))`.as("rest"),
+          sql`LOWER(substr(body, 1, instr(body || ' ', ' ') - 1))`.as("word"),
+          sql`substr(body, instr(body || ' ', ' ') + 1)`.as("rest"),
         ])
-        .where((eb) =>
-          eb.and([eb("body", "is not", null), eb("thread_id", "=", threadId)]),
-        )
+        .where((eb) => eb.and([eb("body", "is not", null), eb("thread_id", "=", threadId)]))
         .unionAll((ebInner) => {
           return ebInner
             .selectFrom("words")
             .select([
-              sql`LOWER(substr(rest, 1, instr(rest || " ", " ") - 1))`.as(
-                "word",
-              ),
-              sql`(substr(rest, instr(rest || " ", " ") + 1))`.as("rest"),
+              sql`LOWER(substr(rest, 1, instr(rest || ' ', ' ') - 1))`.as("word"),
+              sql`substr(rest, instr(rest || ' ', ' ') + 1)`.as("rest"),
             ])
             .where("rest", "<>", "");
         });

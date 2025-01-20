@@ -1,7 +1,7 @@
 import { makePersisted } from "@solid-primitives/storage";
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
 import { Kysely } from "kysely";
-import type { DB } from "kysely-codegen";
+import type { DB } from "./db-schema";
 import { OfficialWasmDialect } from "kysely-wasm";
 import { createSignal } from "solid-js";
 

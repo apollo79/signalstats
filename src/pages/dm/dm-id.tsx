@@ -1,7 +1,7 @@
 import { Suspense, type Component } from "solid-js";
 import { createAsync, type RoutePreloadFunc, type RouteSectionProps } from "@solidjs/router";
 
-import { dmPartnerRecipientQuery, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery } from "~/db-queries";
+import { dmPartnerRecipientQuery, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery, SELF_ID } from "~/db";
 import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
 import { Heading } from "~/components/ui/heading";
 import { Grid } from "~/components/ui/grid";
@@ -15,7 +15,6 @@ import { DmMessagesPerRecipient } from "./dm-messages-per-recipients";
 import { DmMessagesPerWeekday } from "./dm-messages-per-weekday";
 import type { MessageOverview } from "~/types";
 import { createMessageStatsSources } from "~/lib/messages";
-import { SELF_ID } from "~/db";
 import { Flex } from "~/components/ui/flex";
 
 const getDmIdData = (dmId: number) => {

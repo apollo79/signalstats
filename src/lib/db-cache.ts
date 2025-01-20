@@ -1,47 +1,44 @@
 import { deserialize, serialize } from "seroval";
-import { createEffect, createMemo, createRoot, on } from "solid-js";
-import { dbHash } from "~/db";
+import {} from "solid-js";
 import { hashString } from "./hash";
 
 export const DATABASE_HASH_PREFIX = "database";
 
 // clear the cache on new session so that selecting a different database does not result in wrong cache entries
-const clearDbCache = () => {
-  for (let i = 0, len = localStorage.length; i < len; i++) {
-    const key = localStorage.key(i);
+// const clearDbCache = () => {
+//   for (let i = 0, len = localStorage.length; i < len; i++) {
+//     const key = localStorage.key(i);
 
-    if (key?.startsWith(DATABASE_HASH_PREFIX)) {
-      localStorage.removeItem(key);
-    }
-  }
-};
+//     if (key?.startsWith(DATABASE_HASH_PREFIX)) {
+//       localStorage.removeItem(key);
+//     }
+//   }
+// };
 
-let prevDbHash = dbHash();
+// let prevDbHash = dbHash();
 
-createRoot(() => {
-  createEffect(() => {
-    on(
-      dbHash,
-      (currentDbHash) => {
-        if (currentDbHash && currentDbHash !== prevDbHash) {
-          prevDbHash = currentDbHash;
-          clearDbCache();
-        }
-      },
-      {
-        defer: true,
-      },
-    );
-  });
-});
+// createRoot(() => {
+//   createEffect(() => {
+//     on(
+//       dbHash,
+//       (currentDbHash) => {
+//         if (currentDbHash && currentDbHash !== prevDbHash) {
+//           prevDbHash = currentDbHash;
+//           clearDbCache();
+//         }
+//       },
+//       {
+//         defer: true,
+//       },
+//     );
+//   });
+// });
 
 class LocalStorageCacheAdapter {
-  keys = new Set<string>(
-    Object.keys(localStorage).filter((key) => key.startsWith(this.prefix)),
-  );
+  keys = new Set<string>(Object.keys(localStorage).filter((key) => key.startsWith(this.prefix)));
   prefix = "database";
   // TODO: real way of detecting if the db is loaded, on loading the db and opfs (if persisted db?)
-  #dbLoaded = createMemo(() => !!dbHash());
+  // #dbLoaded = createMemo(() => !!dbHash());
 
   #createKey(cacheName: string, key: string): string {
     return `${this.prefix}-${cacheName}-${key}`;
@@ -54,10 +51,7 @@ class LocalStorageCacheAdapter {
     try {
       localStorage.setItem(fullKey, serialize({ isPromise, value }));
     } catch (error: unknown) {
-      if (
-        error instanceof DOMException &&
-        error.name === "QUOTA_EXCEEDED_ERR"
-      ) {
+      if (error instanceof DOMException && error.name === "QUOTA_EXCEEDED_ERR") {
         console.error("Storage quota exceeded, not caching new function calls");
       } else {
         console.error(error);
@@ -66,13 +60,13 @@ class LocalStorageCacheAdapter {
   }
 
   has(cacheName: string, key: string): boolean {
-    if (this.#dbLoaded()) {
-      return this.keys.has(this.#createKey(cacheName, key));
-    }
+    // if (this.#dbLoaded()) {
+    return this.keys.has(this.#createKey(cacheName, key));
+    // }
 
-    console.info("No database loaded");
+    // console.info("No database loaded");
 
-    return false;
+    // return false;
   }
 
   get<R>(
@@ -84,18 +78,18 @@ class LocalStorageCacheAdapter {
         value: R;
       }
     | undefined {
-    if (this.#dbLoaded()) {
-      const item = localStorage.getItem(this.#createKey(cacheName, key));
+    // if (this.#dbLoaded()) {
+    const item = localStorage.getItem(this.#createKey(cacheName, key));
 
-      if (item) {
-        return deserialize(item) as {
-          isPromise: boolean;
-          value: R;
-        };
-      }
-    } else {
-      console.info("No database loaded");
+    if (item) {
+      return deserialize(item) as {
+        isPromise: boolean;
+        value: R;
+      };
     }
+    // } else {
+    //   console.info("No database loaded");
+    // }
   }
 }
 
@@ -128,10 +122,7 @@ const createHashKey = (...args: unknown[]) => {
   return hashString(stringToHash);
 };
 
-export const cached = <T extends unknown[], R, TT>(
-  fn: (...args: T) => R,
-  self?: ThisType<TT>,
-): ((...args: T) => R) => {
+export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?: ThisType<TT>): ((...args: T) => R) => {
   const cacheName = hashString(fn.toString()).toString();
 
   return (...args: T) => {
@@ -140,11 +131,7 @@ export const cached = <T extends unknown[], R, TT>(
     const cachedValue = cache.get<R>(cacheName, cacheKey);
 
     if (cachedValue) {
-      return (
-        cachedValue.isPromise
-          ? Promise.resolve(cachedValue.value)
-          : cachedValue.value
-      ) as R;
+      return (cachedValue.isPromise ? Promise.resolve(cachedValue.value) : cachedValue.value) as R;
     }
 
     let newValue: R;

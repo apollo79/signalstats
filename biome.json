@@ -108,13 +108,7 @@
         }
       }
     },
-    "ignore": [
-      "dist/**/*.ts",
-      "dist/**",
-      "**/*.mjs",
-      "eslint.config.js",
-      "**/*.js"
-    ]
+    "ignore": ["dist/**/*.ts", "dist/**", "**/*.mjs", "eslint.config.js", "**/*.js"]
   },
   "javascript": {
     "formatter": {
