@@ -1,2 +1,2 @@
-export { kyselyDb, SELF_ID } from "./db";
+export { kyselyDb, SELF_ID, dbLoaded, setDbLoaded } from "./db";
 export * from "./db-queries";

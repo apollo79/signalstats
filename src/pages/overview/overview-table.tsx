@@ -26,6 +26,7 @@ import { TextField, TextFieldInput } from "~/components/ui/text-field";
 
 import { cn } from "~/lib/utils";
 import { Flex } from "~/components/ui/flex";
+import { dbLoaded, threadSentMessagesOverviewQuery } from "~/db";
 
 export interface RoomOverview {
   threadId: number;
@@ -53,6 +54,18 @@ const isGroupFilterFn: FilterFn<RoomOverview> = (row, _columnId, filterValue) =>
   }
 
   return !row.original.isGroup;
+};
+
+const rowIsAvailable = (threadId: number): boolean => {
+  if (dbLoaded()) {
+    return true;
+  }
+
+  if (threadSentMessagesOverviewQuery.hasCacheFor(threadId)) {
+    return true;
+  }
+
+  return false;
 };
 
 const SortingDisplay: Component<{ sorting: false | SortDirection; class?: string; activeClass?: string }> = (props) => {
@@ -92,13 +105,14 @@ export const columns = [
     cell: (props) => {
       const isArchived = props.row.getValue("archived");
       const isGroup = props.row.getValue("isGroup");
+      const isCached = !dbLoaded() && rowIsAvailable(props.row.original.threadId);
 
       return (
         <Flex class="w-full" flexDirection="row">
           <span class="max-w-2xl overflow-hidden text-ellipsis whitespace-nowrap font-bold">
             {props.cell.getValue()}
           </span>
-          <Show when={isArchived || isGroup}>
+          <Show when={isArchived || isGroup || !isCached}>
             <Flex flexDirection="row" class="ml-auto gap-2">
               <Show when={isArchived}>
                 <Badge variant="outline" class="ml-auto">
@@ -108,6 +122,11 @@ export const columns = [
               <Show when={isGroup}>
                 <Badge variant="outline" class="ml-auto">
                   Group
+                </Badge>
+              </Show>
+              <Show when={!isCached}>
+                <Badge variant="outline" class="ml-auto">
+                  Not available
                 </Badge>
               </Show>
             </Flex>
@@ -267,12 +286,12 @@ export const OverviewTable = (props: OverviewTableProps) => {
         </div>
         <div class="flex items-start space-x-2">
           <Checkbox
-            id="show-archived"
+            id="show-groups"
             checked={(table.getColumn("isGroup")?.getFilterValue() as boolean | undefined) ?? false}
             onChange={(value) => table.getColumn("isGroup")?.setFilterValue(value)}
           />
           <div class="grid gap-1.5 leading-none">
-            <Label for="show-archived">Show group chats (detailed analysis not implemented)</Label>
+            <Label for="show-groups">Show group chats (detailed analysis not implemented)</Label>
           </div>
         </div>
       </div>
@@ -315,32 +334,39 @@ export const OverviewTable = (props: OverviewTableProps) => {
               {(row) => (
                 <TableRow
                   class="cursor-pointer [&:last-of-type>td:first-of-type]:rounded-bl-md [&:last-of-type>td:last-of-type]:rounded-br-md"
+                  classList={{
+                    "text-muted-foreground": !rowIsAvailable(row.original.threadId),
+                  }}
                   data-state={row.getIsSelected() && "selected"}
                   onPointerEnter={(event) => {
                     const threadId = row.original.threadId;
                     const isGroup = row.original.isGroup;
 
-                    const preloadTimeout = setTimeout(() => {
-                      preload(`/${isGroup ? "group" : "dm"}/${threadId.toString()}`, {
-                        preloadData: true,
-                      });
-                    }, 20);
+                    if (rowIsAvailable(threadId)) {
+                      const preloadTimeout = setTimeout(() => {
+                        preload(`/${isGroup ? "group" : "dm"}/${threadId.toString()}`, {
+                          preloadData: true,
+                        });
+                      }, 20);
 
-                    event.currentTarget.addEventListener(
-                      "pointerout",
-                      () => {
-                        clearTimeout(preloadTimeout);
-                      },
-                      {
-                        once: true,
-                      },
-                    );
+                      event.currentTarget.addEventListener(
+                        "pointerout",
+                        () => {
+                          clearTimeout(preloadTimeout);
+                        },
+                        {
+                          once: true,
+                        },
+                      );
+                    }
                   }}
                   onClick={() => {
                     const threadId = row.original.threadId;
                     const isGroup = row.original.isGroup;
 
-                    navigate(`/${isGroup ? "group" : "dm"}/${threadId.toString()}`);
+                    if (rowIsAvailable(threadId)) {
+                      navigate(`/${isGroup ? "group" : "dm"}/${threadId.toString()}`);
+                    }
                   }}
                 >
                   <For each={row.getVisibleCells()}>

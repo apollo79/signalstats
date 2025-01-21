@@ -11,7 +11,9 @@ export const Overview: Component<RouteSectionProps> = () => {
   const [allSelfSentMessagesCount] = createResource(() => overallSentMessagesQuery(SELF_ID));
 
   const [roomOverview] = createResource<RoomOverview[] | undefined>(async () => {
-    return (await allThreadsOverviewQuery())?.map((row) => {
+    const overview = await allThreadsOverviewQuery();
+
+    return overview.map((row) => {
       const isGroup = row.title !== null;
 
       let name = "";
@@ -41,9 +43,7 @@ export const Overview: Component<RouteSectionProps> = () => {
       <div>
         <p>All messages: {allSelfSentMessagesCount()?.messageCount as number}</p>
         <Show when={!roomOverview.loading && roomOverview()} fallback="Loading...">
-          {(currentRoomOverview) => (
-            console.log(currentRoomOverview()), (<OverviewTable data={currentRoomOverview()} />)
-          )}
+          {(currentRoomOverview) => <OverviewTable data={currentRoomOverview()} />}
         </Show>
       </div>
     </>

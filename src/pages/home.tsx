@@ -6,7 +6,7 @@ import { Portal } from "solid-js/web";
 import { Flex } from "~/components/ui/flex";
 
 import { Progress, ProgressLabel, ProgressValueLabel } from "~/components/ui/progress";
-import { loadDb } from "~/db/db-queries";
+import { loadDb } from "~/db";
 import { decryptBackup } from "~/lib/decryptor";
 import { createDropzone, createFileUploader } from "@solid-primitives/upload";
 import { Button } from "~/components/ui/button";
@@ -37,29 +37,38 @@ export const Home: Component<RouteSectionProps> = () => {
   const [loadingProgress, setLoadingProgress] = createSignal<number>();
   // const [isLoadingDatabase, setIsLoadingDatabase] = createSignal(false);
 
-  const onSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = (event) => {
+  const onSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = async (event) => {
     event.preventDefault();
 
     const currentBackupFile = backupFile();
     const currentPassphrase = passphrase();
 
     if (currentBackupFile && currentPassphrase) {
-      decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress)
-        .then(async (result) => {
-          setDecryptionProgress(undefined);
-          // setIsLoadingDatabase(true);
-          setLoadingProgress(0);
+      // const hashChunk = await currentBackupFile.slice(-1000).text();
+      // const hash = hashString(hashChunk);
 
-          await loadDb(result.database_statements, (newValue) => (console.log(newValue), setLoadingProgress(newValue)));
+      // if (hash === dbHash()) {
+      //   return;
+      // }
 
-          // setIsLoadingDatabase(false);
-          setLoadingProgress(undefined);
+      // setDbHash(hash);
 
-          navigate("/overview");
-        })
-        .catch((error) => {
-          console.error("Decryption failed:", error);
-        });
+      try {
+        const decrypted = await decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress);
+
+        setDecryptionProgress(undefined);
+        // setIsLoadingDatabase(true);
+        setLoadingProgress(0);
+
+        await loadDb(decrypted.database_statements, setLoadingProgress);
+
+        // setIsLoadingDatabase(false);
+        setLoadingProgress(undefined);
+
+        navigate("/overview");
+      } catch (error) {
+        console.error("Decryption failed:", error);
+      }
     }
   };
 

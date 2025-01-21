@@ -1,9 +1,19 @@
 import { sql, type NotNull } from "kysely";
-import { worker, kyselyDb, SELF_ID, DB_FILENAME } from "./db";
-import { cached } from "../lib/db-cache";
-import type { MainToWorkerMsg, WorkerToMainMsg } from "~/lib/kysely-wasqlite-worker/type";
+import { worker, kyselyDb, SELF_ID, DB_FILENAME, setDbLoaded } from "./db";
+import { cached, clearDbCache } from "../lib/db-cache";
+import type { MainToWorkerMsg, WorkerToMainMsg } from "~/lib/kysely-official-wasm-worker/type";
 
-export const loadDb = (statements: string[], progressCallback?: (percentage: number) => void): Promise<void> => {
+export const loadDb = async (statements: string[], progressCallback?: (percentage: number) => void): Promise<void> => {
+  // try to persist storage, https://web.dev/articles/persistent-storage#request_persistent_storage
+  try {
+    if (navigator.storage?.persist && !(await navigator.storage.persisted())) {
+      await navigator.storage.persist();
+    }
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
+  } catch {}
+
+  clearDbCache();
+
   return new Promise((resolve, reject) => {
     const progressListener = ({ data }: MessageEvent<WorkerToMainMsg>) => {
       if (data[0] === 5) {
@@ -19,12 +29,15 @@ export const loadDb = (statements: string[], progressCallback?: (percentage: num
 
         worker.removeEventListener("message", progressListener);
         worker.removeEventListener("message", endListener);
+
+        setDbLoaded(true);
+
         resolve();
       }
     };
 
-    worker.addEventListener("message", progressListener);
     worker.addEventListener("message", endListener);
+    worker.addEventListener("message", progressListener);
 
     worker.postMessage([4, DB_FILENAME, true, statements] satisfies MainToWorkerMsg);
   });

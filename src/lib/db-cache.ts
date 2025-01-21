@@ -1,47 +1,36 @@
 import { deserialize, serialize } from "seroval";
-import {} from "solid-js";
 import { hashString } from "./hash";
 
 export const DATABASE_HASH_PREFIX = "database";
 
+export const hasCashedData = () => {
+  for (let i = 0, len = localStorage.length; i < len; i++) {
+    const key = localStorage.key(i);
+
+    if (key?.startsWith(DATABASE_HASH_PREFIX)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 // clear the cache on new session so that selecting a different database does not result in wrong cache entries
-// const clearDbCache = () => {
-//   for (let i = 0, len = localStorage.length; i < len; i++) {
-//     const key = localStorage.key(i);
+export const clearDbCache = () => {
+  for (let i = 0, len = localStorage.length; i < len; i++) {
+    const key = localStorage.key(i);
 
-//     if (key?.startsWith(DATABASE_HASH_PREFIX)) {
-//       localStorage.removeItem(key);
-//     }
-//   }
-// };
-
-// let prevDbHash = dbHash();
-
-// createRoot(() => {
-//   createEffect(() => {
-//     on(
-//       dbHash,
-//       (currentDbHash) => {
-//         if (currentDbHash && currentDbHash !== prevDbHash) {
-//           prevDbHash = currentDbHash;
-//           clearDbCache();
-//         }
-//       },
-//       {
-//         defer: true,
-//       },
-//     );
-//   });
-// });
+    if (key?.startsWith(DATABASE_HASH_PREFIX)) {
+      localStorage.removeItem(key);
+    }
+  }
+};
 
 class LocalStorageCacheAdapter {
-  keys = new Set<string>(Object.keys(localStorage).filter((key) => key.startsWith(this.prefix)));
-  prefix = "database";
-  // TODO: real way of detecting if the db is loaded, on loading the db and opfs (if persisted db?)
-  // #dbLoaded = createMemo(() => !!dbHash());
+  keys = new Set<string>(Object.keys(localStorage).filter((key) => key.startsWith(DATABASE_HASH_PREFIX)));
 
   #createKey(cacheName: string, key: string): string {
-    return `${this.prefix}-${cacheName}-${key}`;
+    return `${DATABASE_HASH_PREFIX}-${cacheName}-${key}`;
   }
 
   set(cacheName: string, key: string, value: unknown, isPromise = false) {
@@ -60,13 +49,7 @@ class LocalStorageCacheAdapter {
   }
 
   has(cacheName: string, key: string): boolean {
-    // if (this.#dbLoaded()) {
     return this.keys.has(this.#createKey(cacheName, key));
-    // }
-
-    // console.info("No database loaded");
-
-    // return false;
   }
 
   get<R>(
@@ -78,7 +61,6 @@ class LocalStorageCacheAdapter {
         value: R;
       }
     | undefined {
-    // if (this.#dbLoaded()) {
     const item = localStorage.getItem(this.#createKey(cacheName, key));
 
     if (item) {
@@ -87,9 +69,6 @@ class LocalStorageCacheAdapter {
         value: R;
       };
     }
-    // } else {
-    //   console.info("No database loaded");
-    // }
   }
 }
 
@@ -122,10 +101,14 @@ const createHashKey = (...args: unknown[]) => {
   return hashString(stringToHash);
 };
 
-export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?: ThisType<TT>): ((...args: T) => R) => {
+type CachedFn<T extends unknown[], R> = ((...args: T) => R) & {
+  hasCacheFor: (...args: T) => boolean;
+};
+
+export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?: ThisType<TT>): CachedFn<T, R> => {
   const cacheName = hashString(fn.toString()).toString();
 
-  return (...args: T) => {
+  const cachedFn: CachedFn<T, R> = (...args: T) => {
     const cacheKey = createHashKey(...args).toString();
 
     const cachedValue = cache.get<R>(cacheName, cacheKey);
@@ -154,4 +137,12 @@ export const cached = <T extends unknown[], R, TT>(fn: (...args: T) => R, self?:
 
     return newValue;
   };
+
+  cachedFn.hasCacheFor = (...args: T) => {
+    const cacheKey = createHashKey(...args).toString();
+
+    return cache.has(cacheName, cacheKey);
+  };
+
+  return cachedFn;
 };

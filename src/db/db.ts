@@ -1,9 +1,8 @@
-import { makePersisted } from "@solid-primitives/storage";
 import { Kysely } from "kysely";
 import type { DB } from "./db-schema";
+import { OfficialWasmWorkerDialect } from "~/lib/kysely-official-wasm-worker";
+import wasmWorkerUrl from "~/lib/kysely-official-wasm-worker/worker?url";
 import { createSignal } from "solid-js";
-import { WaSqliteWorkerDialect } from "~/lib/kysely-wasqlite-worker";
-import wasmWorkerUrl from "~/lib/kysely-wasqlite-worker/worker?url";
 
 export const SELF_ID = 2;
 
@@ -13,7 +12,7 @@ export const worker = new Worker(wasmWorkerUrl, {
   type: "module",
 });
 
-const dialect = new WaSqliteWorkerDialect({
+const dialect = new OfficialWasmWorkerDialect({
   fileName: DB_FILENAME,
   preferOPFS: true,
   worker,
@@ -23,4 +22,5 @@ export const kyselyDb = new Kysely<DB>({
   dialect,
 });
 
-export const [dbHash, setDbHash] = makePersisted(createSignal<number>());
+export const [dbLoaded, setDbLoaded] = createSignal(false);
+// export const [dbHash, setDbHash] = makePersisted(createSignal<number>());
