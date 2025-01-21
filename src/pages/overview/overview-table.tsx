@@ -105,14 +105,14 @@ export const columns = [
     cell: (props) => {
       const isArchived = props.row.getValue("archived");
       const isGroup = props.row.getValue("isGroup");
-      const isCached = !dbLoaded() && rowIsAvailable(props.row.original.threadId);
+      const isNotAvailable = !rowIsAvailable(props.row.original.threadId);
 
       return (
         <Flex class="w-full" flexDirection="row">
           <span class="max-w-2xl overflow-hidden text-ellipsis whitespace-nowrap font-bold">
             {props.cell.getValue()}
           </span>
-          <Show when={isArchived || isGroup || !isCached}>
+          <Show when={isArchived || isGroup || isNotAvailable}>
             <Flex flexDirection="row" class="ml-auto gap-2">
               <Show when={isArchived}>
                 <Badge variant="outline" class="ml-auto">
@@ -124,7 +124,7 @@ export const columns = [
                   Group
                 </Badge>
               </Show>
-              <Show when={!isCached}>
+              <Show when={isNotAvailable}>
                 <Badge variant="outline" class="ml-auto">
                   Not available
                 </Badge>
