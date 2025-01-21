@@ -40,7 +40,7 @@ if (root) {
                       <Show when={!dbLoaded() && hasCashedData()}>
                         <Callout variant="default" class="my-4">
                           There is currently no backup database loaded, but you can watch statistics that have been
-                          cached, meaning only chats you only watched or were preloaded.
+                          cached, meaning only chats you already opened or chats that were preloaded.
                           <br />
                           <A href="/overview">Watch cached statistics</A>
                         </Callout>
@@ -51,7 +51,7 @@ if (root) {
                       <CalloutTitle>You are watching cached statistics</CalloutTitle>
                       <CalloutContent>
                         Currently there is no backup database loaded. You can only watch statistics that have been
-                        cached, meaning only chats you only watched or were preloaded.
+                        cached, meaning only chats you already opened or chats that were preloaded.
                         <br />
                         <A href="/">Load a backup</A>
                       </CalloutContent>
