@@ -1,16 +1,14 @@
 import { Kysely } from "kysely";
 import type { DB } from "./db-schema";
 import { OfficialWasmWorkerDialect } from "~/lib/kysely-official-wasm-worker";
-import wasmWorkerUrl from "~/lib/kysely-official-wasm-worker/worker?url";
+import WasmWorker from "./db-worker?worker";
 import { createSignal } from "solid-js";
 
 export const SELF_ID = 2;
 
 export const DB_FILENAME = "signal.sqlite";
 
-export const worker = new Worker(wasmWorkerUrl, {
-  type: "module",
-});
+export const worker = new WasmWorker();
 
 const dialect = new OfficialWasmWorkerDialect({
   fileName: DB_FILENAME,
