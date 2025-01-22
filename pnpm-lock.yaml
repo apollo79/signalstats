@@ -38,9 +38,6 @@ importers:
       '@sqlite.org/sqlite-wasm':
         specifier: 3.48.0-build2
         version: 3.48.0-build2
-      '@subframe7536/sqlite-wasm':
-        specifier: ^0.5.1
-        version: 0.5.1
       '@tanstack/solid-table':
         specifier: ^8.20.5
         version: 8.20.5(solid-js@1.9.4)
@@ -102,9 +99,6 @@ importers:
       '@types/node':
         specifier: ^22.10.7
         version: 22.10.7
-      '@types/sql.js':
-        specifier: ^1.4.9
-        version: 1.4.9
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.5.1)
@@ -763,9 +757,6 @@ packages:
     resolution: {integrity: sha512-nltoBHBbLZmI3VioebwUYaSugTpVcHPvL9rYa0uSkqmiLF0b9ZEM8l9NzoWAHlS6qTMqhGHFtX1lWJ/egyjohQ==}
     hasBin: true
 
-  '@subframe7536/sqlite-wasm@0.5.1':
-    resolution: {integrity: sha512-rRszpnvcT045Jd5HkDMIxaYI95BUl8H07mhYmklNW1CbNjJtiD3dN550lRXElwcDUpTQrdhIdmA9A5QwJ+ct+A==}
-
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
 
@@ -800,9 +791,6 @@ packages:
   '@types/d3@3.5.53':
     resolution: {integrity: sha512-8yKQA9cAS6+wGsJpBysmnhlaaxlN42Qizqkw+h2nILSlS+MAG2z4JdO6p+PJrJ+ACvimkmLJL281h157e52psQ==}
 
-  '@types/emscripten@1.39.13':
-    resolution: {integrity: sha512-cFq+fO/isvhvmuP/+Sl4K4jtU6E23DoivtbO4r50e3odaxAiVdbfSYRDdJ4gCdxx+3aRjhphS5ZMwIH4hFy/Cw==}
-
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
@@ -811,9 +799,6 @@ packages:
 
   '@types/node@22.10.7':
     resolution: {integrity: sha512-V09KvXxFiutGp6B7XkpaDXlNadZxrzajcY50EuoLIpQ6WWYCSvf19lVIazzfIzQvhUN2HjX12spLojTnhuKlGg==}
-
-  '@types/sql.js@1.4.9':
-    resolution: {integrity: sha512-ep8b36RKHlgWPqjNG9ToUrPiwkhwh0AEzy883mO5Xnd+cL6VBH1EvSjBAAuxLUFF2Vn/moE3Me6v9E1Lo+48GQ==}
 
   JSONStream@1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
@@ -2704,8 +2689,6 @@ snapshots:
 
   '@sqlite.org/sqlite-wasm@3.48.0-build2': {}
 
-  '@subframe7536/sqlite-wasm@0.5.1': {}
-
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
@@ -2748,8 +2731,6 @@ snapshots:
 
   '@types/d3@3.5.53': {}
 
-  '@types/emscripten@1.39.13': {}
-
   '@types/estree@1.0.6': {}
 
   '@types/hammerjs@2.0.46': {}
@@ -2757,11 +2738,6 @@ snapshots:
   '@types/node@22.10.7':
     dependencies:
       undici-types: 6.20.0
-
-  '@types/sql.js@1.4.9':
-    dependencies:
-      '@types/emscripten': 1.39.13
-      '@types/node': 22.10.7
 
   JSONStream@1.3.5:
     dependencies:
