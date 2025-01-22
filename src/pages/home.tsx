@@ -37,7 +37,7 @@ export const Home: Component<RouteSectionProps> = () => {
   const [loadingProgress, setLoadingProgress] = createSignal<number>();
   // const [isLoadingDatabase, setIsLoadingDatabase] = createSignal(false);
 
-  const onSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = async (event) => {
+  const onSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = (event) => {
     event.preventDefault();
 
     const currentBackupFile = backupFile();
@@ -53,22 +53,24 @@ export const Home: Component<RouteSectionProps> = () => {
 
       // setDbHash(hash);
 
-      try {
-        const decrypted = await decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress);
+      decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress)
+        .then(async (decrypted) => {
+          umami.track("Decrypt backup");
+          setDecryptionProgress(undefined);
+          // setIsLoadingDatabase(true);
+          setLoadingProgress(0);
 
-        setDecryptionProgress(undefined);
-        // setIsLoadingDatabase(true);
-        setLoadingProgress(0);
+          await loadDb(decrypted.database_statements, setLoadingProgress);
+          umami.track("Load database");
 
-        await loadDb(decrypted.database_statements, setLoadingProgress);
+          // setIsLoadingDatabase(false);
+          setLoadingProgress(undefined);
 
-        // setIsLoadingDatabase(false);
-        setLoadingProgress(undefined);
-
-        navigate("/overview");
-      } catch (error) {
-        console.error("Decryption failed:", error);
-      }
+          navigate("/overview");
+        })
+        .catch((error) => {
+          console.error("Decryption failed:", error);
+        });
     }
   };
 

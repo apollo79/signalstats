@@ -94,6 +94,7 @@ export const columns = [
         <Button
           variant="ghost"
           onClick={() => {
+            umami.track("Sort overview table");
             props.column.toggleSorting();
           }}
         >
@@ -144,6 +145,7 @@ export const columns = [
         <Button
           variant="ghost"
           onClick={() => {
+            umami.track("Sort overview table");
             props.column.toggleSorting();
           }}
         >
@@ -162,6 +164,7 @@ export const columns = [
         <Button
           variant="ghost"
           onClick={() => {
+            umami.track("Sort overview table");
             props.column.toggleSorting();
           }}
         >
@@ -269,7 +272,10 @@ export const OverviewTable = (props: OverviewTableProps) => {
         <div class="flex items-center py-4">
           <TextField
             value={(table.getColumn("name")?.getFilterValue() as string | undefined) ?? ""}
-            onChange={(value) => table.getColumn("name")?.setFilterValue(value)}
+            onChange={(value) => {
+              umami.track("Filter overview table");
+              table.getColumn("name")?.setFilterValue(value);
+            }}
           >
             <TextFieldInput placeholder="Filter by name..." class="max-w-sm" />
           </TextField>
@@ -278,7 +284,10 @@ export const OverviewTable = (props: OverviewTableProps) => {
           <Checkbox
             id="show-archived"
             checked={(table.getColumn("archived")?.getFilterValue() as boolean | undefined) ?? false}
-            onChange={(value) => table.getColumn("archived")?.setFilterValue(value)}
+            onChange={(value) => {
+              umami.track("Filter overview table");
+              table.getColumn("archived")?.setFilterValue(value);
+            }}
           />
           <div class="grid gap-1.5 leading-none">
             <Label for="show-archived">Show archived chats</Label>
@@ -288,7 +297,10 @@ export const OverviewTable = (props: OverviewTableProps) => {
           <Checkbox
             id="show-groups"
             checked={(table.getColumn("isGroup")?.getFilterValue() as boolean | undefined) ?? false}
-            onChange={(value) => table.getColumn("isGroup")?.setFilterValue(value)}
+            onChange={(value) => {
+              umami.track("Filter overview table");
+              table.getColumn("isGroup")?.setFilterValue(value);
+            }}
           />
           <div class="grid gap-1.5 leading-none">
             <Label for="show-groups">Show group chats (detailed analysis not implemented)</Label>
@@ -347,7 +359,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
                         preload(`/${isGroup ? "group" : "dm"}/${threadId.toString()}`, {
                           preloadData: true,
                         });
-                      }, 20);
+                      }, 50);
 
                       event.currentTarget.addEventListener(
                         "pointerout",
@@ -365,6 +377,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
                     const isGroup = row.original.isGroup;
 
                     if (rowIsAvailable(threadId)) {
+                      umami.track("Load chat statistics");
                       navigate(`/${isGroup ? "group" : "dm"}/${threadId.toString()}`);
                     }
                   }}

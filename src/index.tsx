@@ -42,7 +42,14 @@ if (root) {
                           There is currently no backup database loaded, but you can watch statistics that have been
                           cached, meaning only chats you already opened or chats that were preloaded.
                           <br />
-                          <A href="/overview">Watch cached statistics</A>
+                          <A
+                            href="/overview"
+                            onClick={() => {
+                              umami.track("Watch cached statistics");
+                            }}
+                          >
+                            Watch cached statistics
+                          </A>
                         </Callout>
                       </Show>
                     }
