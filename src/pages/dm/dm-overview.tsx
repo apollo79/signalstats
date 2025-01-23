@@ -23,7 +23,7 @@ export const DmOverview: Component<{
   };
 
   return (
-    <Grid cols={1} colsMd={2} class="my-12 min-w-[35rem] gap-y-8 text-sm">
+    <Grid cols={1} colsMd={2} class="my-12 w-full gap-y-8 text-sm md:min-w-[35rem]">
       <Flex flexDirection="row" justifyContent="evenly" class="bg-amber-200 p-2 text-amber-900">
         <Flex alignItems="center" justifyContent="center" class="min-w-16">
           <CalendarArrowDown class="h-8 w-8" />

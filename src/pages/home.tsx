@@ -122,16 +122,16 @@ export const Home: Component<RouteSectionProps> = () => {
         </Flex>
       </Portal>
       <Title>Signal stats</Title>
-      <form class="flex flex-col gap-y-8 p-8" onSubmit={onSubmit}>
+      <form class="mx-auto flex w-full flex-col gap-y-8 p-8 md:w-fit" onSubmit={onSubmit}>
         <TextField onChange={(value) => setPassphrase(value)}>
           <TextFieldLabel>Passphrase</TextFieldLabel>
-          <TextFieldInput type="password" class="max-w-md" />
+          <TextFieldInput type="password" class="w-full md:w-sm" />
         </TextField>
         <Flex
           ref={dropzone.setRef}
           justifyContent="center"
           alignItems="center"
-          class="relative min-h-32 min-w-96 max-w-xl rounded-lg border-4 border-border border-dashed"
+          class="relative min-h-40 w-full rounded-lg border-4 border-border border-dashed md:w-xl"
           classList={{
             "border-ring": dropzone.isDragging(),
           }}
@@ -154,7 +154,7 @@ export const Home: Component<RouteSectionProps> = () => {
             {backupFile() ? backupFile()?.name : "or drop the file here"}
           </span>
         </Flex>
-        <Button type="submit" class="max-w-72">
+        <Button type="submit" class="max-w-72 self-end md:w-sm">
           Decrypt and load backup
         </Button>
       </form>

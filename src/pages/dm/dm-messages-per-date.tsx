@@ -21,6 +21,8 @@ export const DmMessagesPerDate: Component<{
             label: "Total",
             data: currentDmMessagesValues.map((row) => row.totalMessages),
             borderWidth: 2,
+            pointRadius: 0,
+            pointHitRadius: 6,
           },
           ...currentRecipients.map((recipient) => {
             return {
@@ -28,6 +30,8 @@ export const DmMessagesPerDate: Component<{
               label: recipient.name.toString(),
               data: currentDmMessagesValues.map((date) => date[recipient.recipientId]),
               borderWidth: 2,
+              pointRadius: 0,
+              pointHitRadius: 6,
             };
           }),
         ],
@@ -41,7 +45,7 @@ export const DmMessagesPerDate: Component<{
         <LineChart
           options={{
             normalized: true,
-            aspectRatio: 3,
+            responsive: true,
             plugins: {
               zoom: {
                 pan: {
@@ -61,6 +65,7 @@ export const DmMessagesPerDate: Component<{
             },
           }}
           data={currentDateChartData()}
+          class="max-h-96"
         />
       )}
     </Show>
