@@ -81,7 +81,7 @@ export const Privacy: Component<RouteSectionProps> = () => {
         practices, you can reach out to the data controller:
       </p>
       <p class="bg-info p-4">
-        Duskflower Technologies
+        duskflower
         <br />
         privacy(at)duskflower.dev
       </p>
