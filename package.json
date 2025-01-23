@@ -1,7 +1,7 @@
 {
-  "name": "vite-template-solid",
+  "name": "signalstats",
   "version": "0.0.0",
-  "description": "",
+  "description": "Watch your signal messenger statistics",
   "type": "module",
   "scripts": {
     "start": "vite",
@@ -57,9 +57,6 @@
     "zen-mitt": "^3.0.0"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "biome lint",
-      "biome format"
-    ]
+    "*.{ts,tsx}": ["biome lint", "biome format"]
   }
 }
