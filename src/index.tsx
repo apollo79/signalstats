@@ -1,13 +1,14 @@
 /* @refresh reload */
 import { MetaProvider } from "@solidjs/meta";
 import { Router, useNavigate } from "@solidjs/router";
-import { render } from "solid-js/web";
+import { Portal, render } from "solid-js/web";
 import App from "./App";
 import { hasCashedData } from "./lib/db-cache";
 import { createEffect, Show } from "solid-js";
 import { dbLoaded } from "./db";
 import { Callout, CalloutContent, CalloutTitle } from "./components/ui/callout";
 import { A } from "./components/ui/A";
+import { isWasmSupported } from "./lib/utils";
 
 const root = document.getElementById("root");
 
@@ -34,13 +35,27 @@ if (root) {
                 }
               });
 
+              const wasmSupport = isWasmSupported();
+
               return (
                 <>
+                  <Show when={!wasmSupport}>
+                    <Portal>
+                      <div class="fixed inset-0 mx-4 flex flex-col items-center justify-center backdrop-blur-lg">
+                        <Callout variant="error">
+                          Your browser does not support WebAssembly, which is required for this site to work with the
+                          big amount of data a signal backup contains.
+                          <br />
+                          Please try a different browser.
+                        </Callout>
+                      </div>
+                    </Portal>
+                  </Show>
                   <Show
                     when={props.location.pathname !== "/" && !dbLoaded() && hasCashedData()}
                     fallback={
                       <Show when={!dbLoaded() && hasCashedData()}>
-                        <Callout variant="default" class="my-4">
+                        <Callout variant="default" class="m-4">
                           There is currently no backup database loaded, but you can watch statistics that have been
                           cached, meaning only chats you already opened or chats that were preloaded.
                           <br />
@@ -56,7 +71,7 @@ if (root) {
                       </Show>
                     }
                   >
-                    <Callout variant="warning" class="my-4">
+                    <Callout variant="warning" class="m-4">
                       <CalloutTitle>You are watching cached statistics</CalloutTitle>
                       <CalloutContent>
                         Currently there is no backup database loaded. You can only watch statistics that have been
