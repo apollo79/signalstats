@@ -17,6 +17,8 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
+const NO_DATA_NEEDED_PAGES = ["/", "/privacy"];
+
 if (root) {
   render(
     () => (
@@ -27,7 +29,7 @@ if (root) {
               const navigate = useNavigate();
 
               createEffect(() => {
-                if (!dbLoaded() && !hasCashedData() && props.location.pathname !== "/") {
+                if (!dbLoaded() && !hasCashedData() && !NO_DATA_NEEDED_PAGES.includes(props.location.pathname)) {
                   navigate("/");
                 }
               });

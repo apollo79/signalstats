@@ -1,6 +1,7 @@
 import { lazy } from "solid-js";
 
 export { Home } from "./home";
+export { Privacy } from "./privacy";
 
 export { preloadDmId } from "./dm/dm-id";
 export const GroupId = lazy(() => import("./group/group-id"));

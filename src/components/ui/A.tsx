@@ -4,5 +4,5 @@ import clsx from "clsx";
 
 export const A: Component<AnchorProps> = (props) => {
   const [local, other] = splitProps(props, ["class"]);
-  return <BaseA class={clsx("text-primary", local.class)} {...other} />;
+  return <BaseA class={clsx("text-accent-foreground", local.class)} {...other} />;
 };
