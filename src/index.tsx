@@ -18,12 +18,20 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
+if (import.meta.env.DEV && !("umami" in window)) {
+  // @ts-ignore
+  window.umami = {
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
+    track: () => {},
+  };
+}
+
 const NO_DATA_NEEDED_PAGES = ["/", "/privacy"];
 
 if (root) {
   render(
     () => (
-      <div class="mx-auto max-w-screen-2xl">
+      <div class="mx-auto max-w-(--breakpoint-2xl)">
         <MetaProvider>
           <Router
             root={(props) => {
@@ -81,10 +89,10 @@ if (root) {
                       </CalloutContent>
                     </Callout>
                   </Show>
-                  {props.children}
-                  <div class="flex flex-row justify-end bg-muted p-8">
+                  <main>{props.children}</main>
+                  <footer class="mt-4 flex flex-row justify-end bg-muted p-8">
                     <A href="/privacy">Privacy policy</A>
-                  </div>
+                  </footer>
                 </>
               );
             }}

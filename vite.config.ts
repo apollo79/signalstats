@@ -2,9 +2,10 @@ import path from "path";
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
 import wasm from "vite-plugin-wasm";
+import tailwind from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [solidPlugin(), wasm()],
+  plugins: [solidPlugin(), wasm(), tailwind()],
   server: {
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin",
@@ -13,10 +14,7 @@ export default defineConfig({
     port: 3000,
   },
   optimizeDeps: {
-    exclude: [
-      "@duskflower/signal-decrypt-backup-wasm",
-      "@sqlite.org/sqlite-wasm",
-    ],
+    exclude: ["@duskflower/signal-decrypt-backup-wasm", "@sqlite.org/sqlite-wasm"],
   },
   build: {
     target: "esnext",
