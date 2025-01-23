@@ -35,7 +35,10 @@ const App: Component = () => {
               <>
                 <ColorModeScript storageType={storageManager.type} />
                 <ColorModeProvider storageManager={storageManager}>
-                  <header class="flex justify-end bg-accent p-4">
+                  <header class="flex justify-between bg-accent p-4">
+                    <A class="text-2xl text-content" href="/">
+                      Signalstats
+                    </A>
                     <ModeToggle />
                   </header>
                   <Show when={!wasmSupport}>

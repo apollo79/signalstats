@@ -9,6 +9,7 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
+// polyfill umami track function for development
 if (import.meta.env.DEV && !("umami" in window)) {
   // @ts-ignore
   window.umami = {
