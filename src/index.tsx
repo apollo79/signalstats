@@ -67,6 +67,9 @@ if (root) {
                     </Callout>
                   </Show>
                   {props.children}
+                  <div class="flex flex-row justify-end bg-muted p-8">
+                    <A href="/privacy">Privacy policy</A>
+                  </div>
                 </>
               );
             }}

@@ -9,13 +9,13 @@ export const Privacy: Component<RouteSectionProps> = () => {
       <Heading level={1}>Privacy policy</Heading>
       <Heading level={2}>Introduction</Heading>
       <p>
-        This project ("signalstats", "I", "my") was built with the explicit target to not harm the privacy of its users.
-        This project was created to be useful, but also to showcase privacy preserving technology. It is built to not
-        collect any personal identifiable information.
+        This project ("signalstats", "I", "my") was built with the intention to not harm the privacy of its users. This
+        project was created to be useful, but also to showcase privacy-preserving technology. It is designed to not
+        collect any personally identifiable information.
       </p>
       <p>
-        Therefore all data processing happens on your device. The data contained in your backup and your passphrase will
-        never leave it.
+        All data processing happens on your device. The data contained in your backup and your passphrase will never
+        leave it.
       </p>
       <Heading level={2}>Data I collect and usage of data</Heading>
       <p>
