@@ -2,11 +2,12 @@ import type { RouteSectionProps } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { A } from "~/components/ui/A";
 import { Heading } from "~/components/ui/heading";
+import * as m from "~/paraglide/messages";
 
 export const Privacy: Component<RouteSectionProps> = () => {
   return (
     <div class="m-auto mb-8 max-w-4xl [&>:is(p,ul)]:mb-4">
-      <Heading level={1}>Privacy policy</Heading>
+      <Heading level={1}>{m.few_helpful_kestrel_swim()}</Heading>
       <Heading level={2}>Introduction</Heading>
       <p>
         This project ("signalstats", "I", "my") was built with the intention to not harm the privacy of its users. This

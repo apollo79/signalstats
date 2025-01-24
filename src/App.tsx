@@ -5,6 +5,7 @@ import "./app.css";
 import { ColorModeProvider, ColorModeScript, createLocalStorageManager } from "@kobalte/core";
 import { MetaProvider } from "@solidjs/meta";
 import { Portal } from "solid-js/web";
+import * as m from "~/paraglide/messages";
 import { Callout, CalloutContent, CalloutTitle } from "./components/ui/callout";
 import { ModeToggle } from "./components/ui/mode-toggle";
 import { dbLoaded } from "./db";
@@ -44,10 +45,9 @@ const App: Component = () => {
                     <Portal>
                       <div class="fixed inset-0 mx-4 flex flex-col items-center justify-center backdrop-blur-lg">
                         <Callout variant="error">
-                          Your browser does not support WebAssembly, which is required for this site to work with the
-                          big amount of data a signal backup contains.
+                          {m.grassy_early_hawk_find()}
                           <br />
-                          Please try a different browser.
+                          {m.simple_round_nuthatch_aim()}
                         </Callout>
                       </div>
                     </Portal>
@@ -57,8 +57,7 @@ const App: Component = () => {
                     fallback={
                       <Show when={!dbLoaded() && hasCashedData()}>
                         <Callout variant="default" class="m-4">
-                          There is currently no backup database loaded, but you can watch statistics that have been
-                          cached, meaning only chats you already opened or chats that were preloaded.
+                          {m.home_fun_peacock_prosper()}
                           <br />
                           <A
                             href="/overview"
@@ -66,19 +65,18 @@ const App: Component = () => {
                               umami.track("Watch cached statistics");
                             }}
                           >
-                            Watch cached statistics
+                            {m.every_tasty_toad_dream()}
                           </A>
                         </Callout>
                       </Show>
                     }
                   >
                     <Callout variant="warning" class="m-4">
-                      <CalloutTitle>You are watching cached statistics</CalloutTitle>
+                      <CalloutTitle>{m.glad_fun_polecat_trim()}</CalloutTitle>
                       <CalloutContent>
-                        Currently there is no backup database loaded. You can only watch statistics that have been
-                        cached, meaning only chats you already opened or chats that were preloaded.
+                        {m.curly_broad_insect_grow()}
                         <br />
-                        <A href="/">Load a backup</A>
+                        <A href="/">{m.noble_muddy_elephant_lead()}</A>
                       </CalloutContent>
                     </Callout>
                   </Show>
@@ -86,7 +84,7 @@ const App: Component = () => {
                     <Suspense>{props.children}</Suspense>
                   </main>
                   <footer class="mt-4 flex flex-row justify-end bg-muted p-8">
-                    <A href="/privacy">Privacy policy</A>
+                    <A href="/privacy">{m.few_helpful_kestrel_swim()}</A>
                   </footer>
                 </ColorModeProvider>
               </>

@@ -3,6 +3,7 @@ import type { RouteSectionProps } from "@solidjs/router";
 import { type Component, Show, createResource } from "solid-js";
 import { SELF_ID, allThreadsOverviewQuery, overallSentMessagesQuery } from "~/db";
 import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
+import * as m from "~/paraglide/messages";
 import { OverviewTable, type RoomOverview } from "./overview-table";
 
 export const Overview: Component<RouteSectionProps> = () => {
@@ -36,11 +37,12 @@ export const Overview: Component<RouteSectionProps> = () => {
 
   return (
     <>
-      <Title>Signal statistics overview</Title>
-
+      <Title>{m.minor_ideal_chipmunk_slide()}</Title>
       <div>
-        <p>All messages: {allSelfSentMessagesCount()?.messageCount as number}</p>
-        <Show when={!roomOverview.loading && roomOverview()} fallback="Loading...">
+        <p>
+          {m.grassy_tidy_wallaby_explore()} {allSelfSentMessagesCount()?.messageCount as number}
+        </p>
+        <Show when={!roomOverview.loading && roomOverview()} fallback={m.mealy_wacky_toucan_spark()}>
           {(currentRoomOverview) => <OverviewTable data={currentRoomOverview()} />}
         </Show>
       </div>

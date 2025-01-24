@@ -7,6 +7,7 @@ import { Heading } from "~/components/ui/heading";
 import { SELF_ID, dmPartnerRecipientQuery, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery } from "~/db";
 import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
 import { createMessageStatsSources } from "~/lib/messages";
+import * as m from "~/paraglide/messages";
 import type { MessageOverview } from "~/types";
 import { DmMessagesPerDate } from "./dm-messages-per-date";
 import { DmMessagesPerDaytime } from "./dm-messages-per-daytime";
@@ -90,53 +91,57 @@ export const DmId: Component<RouteSectionProps> = (props) => {
 
   return (
     <>
-      <Title>Dm with {dmPartner()?.name}</Title>
+      <Title>
+        {m.petty_best_bobcat_affirm()} {dmPartner()?.name}
+      </Title>
       <div class="flex flex-col items-center">
-        <Heading level={1}>DM with {dmPartner()?.name}</Heading>
-        <Heading level={2}>Chat timeline</Heading>
+        <Heading level={1}>
+          {m.petty_best_bobcat_affirm()} {dmPartner()?.name}
+        </Heading>
+        <Heading level={2}>{m.legal_inclusive_lionfish_zap()}</Heading>
         <Suspense
           fallback={
             <Flex alignItems="center" justifyContent="center" class="h-64">
-              <p class="text-4xl">Loading...</p>
+              <p class="text-4xl">{m.mealy_wacky_toucan_spark()}</p>
             </Flex>
           }
         >
           <DmMessagesPerDate dateStats={dmMessageStats()?.date} recipients={recipients()} />
         </Suspense>
         <DmOverview messages={dmMessagesOverview()} />
-        <Heading level={2}>Messages per</Heading>
+        <Heading level={2}>{m.fresh_grand_millipede_twirl()}</Heading>
 
         <Suspense
           fallback={
             <Flex alignItems="center" justifyContent="center" class="h-64">
-              <p class="text-4xl">Loading...</p>
+              <p class="text-4xl">{m.mealy_wacky_toucan_spark()}</p>
             </Flex>
           }
         >
           <Grid cols={1} colsMd={2} class="gap-x-16 gap-y-16">
             <div>
-              <Heading level={3}>Person</Heading>
+              <Heading level={3}>{m.top_brief_sparrow_boost()}</Heading>
               <DmMessagesPerRecipient personStats={dmMessageStats()?.person} recipients={recipients()} />
             </div>
             <div>
-              <Heading level={3}>Daytime</Heading>
+              <Heading level={3}>{m.cool_cozy_dingo_mop()}</Heading>
               <DmMessagesPerDaytime daytimeStats={dmMessageStats()?.daytime} recipients={recipients()} />
             </div>
             <div>
-              <Heading level={3}>Month</Heading>
+              <Heading level={3}>{m.funny_wise_mink_boil()}</Heading>
               <DmMessagesPerMonth monthStats={dmMessageStats()?.month} recipients={recipients()} />
             </div>
             <div>
-              <Heading level={3}>Weekday</Heading>
+              <Heading level={3}>{m.wise_house_bobcat_boil()}</Heading>
               <DmMessagesPerWeekday weekdayStats={dmMessageStats()?.weekday} recipients={recipients()} />
             </div>
           </Grid>
         </Suspense>
-        <Heading level={2}>Word cloud</Heading>
+        <Heading level={2}>{m.north_green_goat_arise()}</Heading>
         <Suspense
           fallback={
             <Flex alignItems="center" justifyContent="center" class="h-64">
-              <p class="text-4xl">Loading...</p>
+              <p class="text-4xl">{m.mealy_wacky_toucan_spark()}</p>
             </Flex>
           }
         >

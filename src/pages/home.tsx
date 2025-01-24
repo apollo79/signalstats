@@ -10,6 +10,7 @@ import { Progress, ProgressLabel, ProgressValueLabel } from "~/components/ui/pro
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { loadDb } from "~/db";
 import { decryptBackup } from "~/lib/backup-decryptor";
+import * as m from "~/paraglide/messages";
 
 export const Home: Component<RouteSectionProps> = () => {
   const navigate = useNavigate();
@@ -83,7 +84,7 @@ export const Home: Component<RouteSectionProps> = () => {
           }}
         >
           <Show when={decryptionProgress() !== undefined}>
-            <p class="font-bold text-2xl">Decrypting backup</p>
+            <p class="font-bold text-2xl">{m.polite_brief_tern_promise()}</p>
             <Progress
               value={decryptionProgress()}
               minValue={0}
@@ -92,13 +93,13 @@ export const Home: Component<RouteSectionProps> = () => {
               class="w-[300px] space-y-1"
             >
               <div class="flex justify-between">
-                <ProgressLabel>Decrypting...</ProgressLabel>
+                <ProgressLabel>{m.awake_best_millipede_dazzle()}</ProgressLabel>
                 <ProgressValueLabel />
               </div>
             </Progress>
           </Show>
           <Show when={totalStatements() !== 0}>
-            <p class="font-bold text-2xl">Loading database</p>
+            <p class="font-bold text-2xl">{m.ideal_wise_poodle_leap()}</p>
             <Progress
               value={executedStatements()}
               minValue={0}
@@ -107,7 +108,7 @@ export const Home: Component<RouteSectionProps> = () => {
               class="w-[300px] space-y-1"
             >
               <div class="flex justify-between">
-                <ProgressLabel>Loading...</ProgressLabel>
+                <ProgressLabel>{m.mealy_wacky_toucan_spark()}</ProgressLabel>
                 <ProgressValueLabel />
               </div>
             </Progress>
@@ -118,7 +119,7 @@ export const Home: Component<RouteSectionProps> = () => {
       <form class="mx-auto flex w-full flex-col gap-y-8 p-8 md:w-fit" onSubmit={onSubmit}>
         <Flex flexDirection="row" class="w-full gap-x-2 md:w-sm" alignItems="end">
           <TextField onChange={(value) => setPassphrase(value)} class="grow">
-            <TextFieldLabel>Passphrase</TextFieldLabel>
+            <TextFieldLabel>{m.big_actual_osprey_jump()}</TextFieldLabel>
             <TextFieldInput type={showPassphrase() ? "text" : "password"} />
           </TextField>
           <Button variant="ghost" onClick={() => setShowPassphrase((oldValue) => !oldValue)}>
@@ -143,7 +144,7 @@ export const Home: Component<RouteSectionProps> = () => {
               })
             }
           >
-            Select backup file
+            {m.same_heroic_robin_grow()}
           </Button>
           <span
             class="absolute bottom-2"
@@ -151,11 +152,11 @@ export const Home: Component<RouteSectionProps> = () => {
               "text-muted-foreground": !backupFile(),
             }}
           >
-            {backupFile() ? backupFile()?.name : "or drop the file here"}
+            {backupFile() ? backupFile()?.name : m.neat_real_squid_cure()}
           </span>
         </Flex>
         <Button type="submit" class="max-w-72 self-end md:w-sm">
-          Decrypt and load backup
+          {m.green_awake_oryx_aid()}
         </Button>
       </form>
     </>

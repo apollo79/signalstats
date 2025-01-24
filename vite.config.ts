@@ -1,11 +1,20 @@
 import path from "path";
+import { paraglide } from "@inlang/paraglide-vite";
 import tailwind from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
 import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
-  plugins: [solidPlugin(), wasm(), tailwind()],
+  plugins: [
+    paraglide({
+      project: "./project.inlang",
+      outdir: "./src/paraglide",
+    }),
+    solidPlugin(),
+    wasm(),
+    tailwind(),
+  ],
   server: {
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin",

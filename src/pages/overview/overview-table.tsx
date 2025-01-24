@@ -24,6 +24,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~
 import { TextField, TextFieldInput } from "~/components/ui/text-field";
 import { dbLoaded, threadSentMessagesOverviewQuery } from "~/db";
 import { cn } from "~/lib/utils";
+import * as m from "~/paraglide/messages";
 
 export interface RoomOverview {
   threadId: number;
@@ -95,7 +96,7 @@ export const columns = [
             props.column.toggleSorting();
           }}
         >
-          Name
+          {m.stout_busy_bumblebee_praise()}
           <SortingDisplay sorting={sorting()} class="ml-2 h-4 w-4" activeClass="text-info-foreground" />
         </Button>
       );
@@ -114,17 +115,17 @@ export const columns = [
             <Flex flexDirection="row" class="ml-auto gap-2">
               <Show when={isArchived}>
                 <Badge variant="outline" class="ml-auto">
-                  Archived
+                  {m.front_shy_gecko_climb()}
                 </Badge>
               </Show>
               <Show when={isGroup}>
                 <Badge variant="outline" class="ml-auto">
-                  Group
+                  {m.broad_pretty_donkey_burn()}
                 </Badge>
               </Show>
               <Show when={isNotAvailable}>
                 <Badge variant="outline" class="ml-auto">
-                  Not available
+                  {m.every_ornate_tuna_slurp()}
                 </Badge>
               </Show>
             </Flex>
@@ -146,7 +147,7 @@ export const columns = [
             props.column.toggleSorting();
           }}
         >
-          Number of messages
+          {m.bland_tidy_rooster_aid()}
           <SortingDisplay sorting={sorting()} class="ml-2 h-4 w-4" activeClass="text-info-foreground" />
         </Button>
       );
@@ -165,7 +166,7 @@ export const columns = [
             props.column.toggleSorting();
           }}
         >
-          Date of last message
+          {m.silly_bland_buzzard_glow()}
           <SortingDisplay sorting={sorting()} class="ml-2 h-4 w-4" activeClass="text-info-foreground" />
         </Button>
       );
@@ -186,7 +187,7 @@ export const columns = [
     cell: (props) => {
       return (
         <Show when={props.cell.getValue()}>
-          <Badge>Archived</Badge>
+          <Badge>{m.front_shy_gecko_climb()}</Badge>
         </Show>
       );
     },
@@ -197,7 +198,7 @@ export const columns = [
     cell: (props) => {
       return (
         <Show when={props.cell.getValue()}>
-          <Badge>Group</Badge>
+          <Badge>{m.broad_pretty_donkey_burn()}</Badge>
         </Show>
       );
     },
@@ -274,7 +275,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
               table.getColumn("name")?.setFilterValue(value);
             }}
           >
-            <TextFieldInput placeholder="Filter by name..." class="max-w-sm" />
+            <TextFieldInput placeholder={m.home_white_wren_offer()} class="max-w-sm" />
           </TextField>
         </div>
         <div class="flex items-start space-x-2">
@@ -287,7 +288,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
             }}
           />
           <div class="grid gap-1.5 leading-none">
-            <Label for="show-archived">Show archived chats</Label>
+            <Label for="show-archived">{m.light_safe_crow_treasure()}</Label>
           </div>
         </div>
         <div class="flex items-start space-x-2">
@@ -300,7 +301,7 @@ export const OverviewTable = (props: OverviewTableProps) => {
             }}
           />
           <div class="grid gap-1.5 leading-none">
-            <Label for="show-groups">Show group chats (detailed analysis not implemented)</Label>
+            <Label for="show-groups">{m.proof_heavy_dingo_bubble()}</Label>
           </div>
         </div>
       </div>

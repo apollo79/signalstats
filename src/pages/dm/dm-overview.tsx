@@ -3,6 +3,7 @@ import { type Component, Show } from "solid-js";
 import { Flex } from "~/components/ui/flex";
 import { Grid } from "~/components/ui/grid";
 import { getDistanceBetweenDatesInDays } from "~/lib/date";
+import * as m from "~/paraglide/messages";
 import type { MessageOverview } from "~/types";
 
 export const DmOverview: Component<{
@@ -29,7 +30,7 @@ export const DmOverview: Component<{
           <CalendarArrowDown class="h-8 w-8" />
         </Flex>
         <Flex flexDirection="col" justifyContent="around" class="flex-1">
-          <span>Your first message is from</span>
+          <span>{m.knotty_wild_rat_aim()}</span>
           <Show when={dmOverview()}>
             {(currentDmOverview) => (
               <span class="font-semibold text-2xl">{currentDmOverview().firstMessageDate.toDateString()}</span>
@@ -42,7 +43,7 @@ export const DmOverview: Component<{
           <CalendarArrowUp class="h-8 w-8" />
         </Flex>
         <Flex flexDirection="col" justifyContent="around" class="flex-1">
-          <span>Your last message is from</span>
+          <span>{m.bald_helpful_millipede_intend()}</span>
           <Show when={dmOverview()}>
             {(currentDmOverview) => (
               <span class="font-semibold text-2xl">{currentDmOverview().lastMessageDate.toDateString()}</span>
@@ -55,7 +56,7 @@ export const DmOverview: Component<{
           <CalendarClock class="h-8 w-8" />
         </Flex>
         <Flex flexDirection="col" justifyContent="around" class="flex-1">
-          <span>You have been chatting for</span>
+          <span>{m.trite_civil_niklas_laugh()}</span>
           <Show when={dmOverview()}>
             {(currentDmOverview) => (
               <span class="font-semibold text-2xl">
@@ -66,7 +67,7 @@ export const DmOverview: Component<{
               </span>
             )}
           </Show>
-          <span>days</span>
+          <span>{m.careful_real_deer_buzz()}</span>
         </Flex>
       </Flex>
       <Flex flexDirection="row" justifyContent="evenly" class="bg-pink-200 p-2 text-pink-900">
@@ -74,13 +75,13 @@ export const DmOverview: Component<{
           <MessagesSquare class="h-8 w-8" />
         </Flex>
         <Flex flexDirection="col" justifyContent="around" class="flex-1">
-          <span>You have written</span>
+          <span>{m.due_gaudy_lark_grip()}</span>
           <Show when={dmOverview()}>
             {(currentDmOverview) => (
               <span class="font-semibold text-2xl">{currentDmOverview().messageCount.toString()}</span>
             )}
           </Show>
-          <span>messages</span>
+          <span>{m.weary_noble_ostrich_cry()}</span>
         </Flex>
       </Flex>
     </Grid>
