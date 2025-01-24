@@ -1,7 +1,7 @@
-import { sql, type NotNull } from "kysely";
-import { worker, kyselyDb, SELF_ID, DB_FILENAME, setDbLoaded } from "./db";
-import { cached, clearDbCache } from "../lib/db-cache";
+import { type NotNull, sql } from "kysely";
 import type { MainToWorkerMsg, WorkerToMainMsg } from "~/lib/kysely-official-wasm-worker/type";
+import { cached, clearDbCache } from "../lib/db-cache";
+import { DB_FILENAME, SELF_ID, kyselyDb, setDbLoaded, worker } from "./db";
 
 export const loadDb = async (statements: string[], progressCallback?: (percentage: number) => void): Promise<void> => {
   // try to persist storage, https://web.dev/articles/persistent-storage#request_persistent_storage

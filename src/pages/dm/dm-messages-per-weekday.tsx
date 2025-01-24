@@ -1,5 +1,5 @@
-import { Show, type Accessor, type Component } from "solid-js";
 import type { ChartData } from "chart.js";
+import { type Accessor, type Component, Show } from "solid-js";
 import { RadarChart } from "~/components/ui/charts";
 import { weekdayNames } from "~/lib/messages";
 import type { MessageStats, Recipients } from "~/types";

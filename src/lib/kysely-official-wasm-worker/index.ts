@@ -1,11 +1,4 @@
-import type {
-  DatabaseIntrospector,
-  Dialect,
-  DialectAdapter,
-  Driver,
-  Kysely,
-  QueryCompiler,
-} from "kysely";
+import type { DatabaseIntrospector, Dialect, DialectAdapter, Driver, Kysely, QueryCompiler } from "kysely";
 import { SqliteAdapter, SqliteIntrospector, SqliteQueryCompiler } from "kysely";
 import { OfficialWasmWorkerDriver } from "./driver";
 import type { OfficialWasmWorkerDialectConfig } from "./type";

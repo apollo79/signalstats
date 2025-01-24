@@ -1,21 +1,20 @@
-import { Suspense, type Component } from "solid-js";
-import { createAsync, type RoutePreloadFunc, type RouteSectionProps } from "@solidjs/router";
-
-import { dmPartnerRecipientQuery, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery, SELF_ID } from "~/db";
-import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
-import { Heading } from "~/components/ui/heading";
-import { Grid } from "~/components/ui/grid";
 import { Title } from "@solidjs/meta";
+import { type RoutePreloadFunc, type RouteSectionProps, createAsync } from "@solidjs/router";
+import { type Component, Suspense } from "solid-js";
+import { Flex } from "~/components/ui/flex";
+import { Grid } from "~/components/ui/grid";
+import { Heading } from "~/components/ui/heading";
+import { SELF_ID, dmPartnerRecipientQuery, threadMostUsedWordsQuery, threadSentMessagesOverviewQuery } from "~/db";
+import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
+import { createMessageStatsSources } from "~/lib/messages";
+import type { MessageOverview } from "~/types";
 import { DmMessagesPerDate } from "./dm-messages-per-date";
-import { DmOverview } from "./dm-overview";
-import { DmWordCloud } from "./dm-wordcloud";
-import { DmMessagesPerMonth } from "./dm-messages-per-month";
 import { DmMessagesPerDaytime } from "./dm-messages-per-daytime";
+import { DmMessagesPerMonth } from "./dm-messages-per-month";
 import { DmMessagesPerRecipient } from "./dm-messages-per-recipients";
 import { DmMessagesPerWeekday } from "./dm-messages-per-weekday";
-import type { MessageOverview } from "~/types";
-import { createMessageStatsSources } from "~/lib/messages";
-import { Flex } from "~/components/ui/flex";
+import { DmOverview } from "./dm-overview";
+import { DmWordCloud } from "./dm-wordcloud";
 
 const getDmIdData = (dmId: number) => {
   // the other person in the chat with name and id

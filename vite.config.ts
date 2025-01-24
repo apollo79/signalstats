@@ -1,8 +1,8 @@
 import path from "path";
+import tailwind from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
 import wasm from "vite-plugin-wasm";
-import tailwind from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [solidPlugin(), wasm(), tailwind()],

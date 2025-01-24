@@ -1,8 +1,8 @@
 import { Kysely } from "kysely";
-import type { DB } from "./db-schema";
-import { OfficialWasmWorkerDialect } from "~/lib/kysely-official-wasm-worker";
-import WasmWorker from "./db-worker?worker";
 import { createSignal } from "solid-js";
+import { OfficialWasmWorkerDialect } from "~/lib/kysely-official-wasm-worker";
+import type { DB } from "./db-schema";
+import WasmWorker from "./db-worker?worker";
 
 export const SELF_ID = 2;
 

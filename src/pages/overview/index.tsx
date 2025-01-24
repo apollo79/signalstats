@@ -1,9 +1,7 @@
-import type { RouteSectionProps } from "@solidjs/router";
-import { type Component, createResource, Show } from "solid-js";
-
-import { allThreadsOverviewQuery, overallSentMessagesQuery, SELF_ID } from "~/db";
-
 import { Title } from "@solidjs/meta";
+import type { RouteSectionProps } from "@solidjs/router";
+import { type Component, Show, createResource } from "solid-js";
+import { SELF_ID, allThreadsOverviewQuery, overallSentMessagesQuery } from "~/db";
 import { getNameFromRecipient } from "~/lib/get-name-from-recipient";
 import { OverviewTable, type RoomOverview } from "./overview-table";
 

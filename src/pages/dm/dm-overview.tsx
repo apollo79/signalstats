@@ -1,7 +1,7 @@
-import { Show, type Component } from "solid-js";
+import { CalendarArrowDown, CalendarArrowUp, CalendarClock, MessagesSquare } from "lucide-solid";
+import { type Component, Show } from "solid-js";
 import { Flex } from "~/components/ui/flex";
 import { Grid } from "~/components/ui/grid";
-import { CalendarArrowDown, CalendarArrowUp, CalendarClock, MessagesSquare } from "lucide-solid";
 import { getDistanceBetweenDatesInDays } from "~/lib/date";
 import type { MessageOverview } from "~/types";
 

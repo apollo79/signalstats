@@ -1,32 +1,29 @@
-import { type Component, createSignal, For, Match, Show, Switch } from "solid-js";
 import { useNavigate, usePreloadRoute } from "@solidjs/router";
-
 import {
   type ColumnFiltersState,
+  type FilterFn,
+  type SortDirection,
+  type SortingState,
   createColumnHelper,
   createSolidTable,
-  type FilterFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  type SortDirection,
-  type SortingState,
 } from "@tanstack/solid-table";
 import { intlFormatDistance } from "date-fns";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-solid";
-
+import { type Component, For, Match, Show, Switch, createSignal } from "solid-js";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import { Flex } from "~/components/ui/flex";
 import { Label } from "~/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { TextField, TextFieldInput } from "~/components/ui/text-field";
-
-import { cn } from "~/lib/utils";
-import { Flex } from "~/components/ui/flex";
 import { dbLoaded, threadSentMessagesOverviewQuery } from "~/db";
+import { cn } from "~/lib/utils";
 
 export interface RoomOverview {
   threadId: number;

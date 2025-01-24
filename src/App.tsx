@@ -1,16 +1,15 @@
 import { A, Route, Router, useNavigate } from "@solidjs/router";
-import { createEffect, Show, Suspense, type Component } from "solid-js";
-import { DmId, GroupId, Home, Overview, preloadDmId, Privacy } from "./pages";
-
+import { type Component, Show, Suspense, createEffect } from "solid-js";
+import { DmId, GroupId, Home, Overview, Privacy, preloadDmId } from "./pages";
 import "./app.css";
+import { ColorModeProvider, ColorModeScript, createLocalStorageManager } from "@kobalte/core";
 import { MetaProvider } from "@solidjs/meta";
 import { Portal } from "solid-js/web";
-import { Callout, CalloutTitle, CalloutContent } from "./components/ui/callout";
+import { Callout, CalloutContent, CalloutTitle } from "./components/ui/callout";
+import { ModeToggle } from "./components/ui/mode-toggle";
 import { dbLoaded } from "./db";
 import { hasCashedData } from "./lib/db-cache";
 import { isWasmSupported } from "./lib/utils";
-import { ColorModeProvider, ColorModeScript, createLocalStorageManager } from "@kobalte/core";
-import { ModeToggle } from "./components/ui/mode-toggle";
 
 const NO_DATA_NEEDED_PAGES = ["/", "/privacy"];
 

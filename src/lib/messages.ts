@@ -1,6 +1,6 @@
 import type { MessageOverview, MessageStats, Recipients } from "~/types";
-import { cached } from "./db-cache";
 import { getHourList, getMonthList, getWeekdayList } from "./date";
+import { cached } from "./db-cache";
 import MessageStatsWorker from "./messages-worker?worker";
 
 export const hourNames = getHourList();

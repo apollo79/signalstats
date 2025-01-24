@@ -1,5 +1,5 @@
-import { getHourList, getMonthList, getWeekdayList } from "./date";
 import type { MessageOverview, MessageStats, Recipients } from "~/types";
+import { getHourList, getMonthList, getWeekdayList } from "./date";
 
 const hourNames = getHourList();
 

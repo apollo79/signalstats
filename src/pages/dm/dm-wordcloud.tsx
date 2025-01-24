@@ -1,5 +1,5 @@
 import type { ChartData } from "chart.js";
-import { Show, type Accessor, type Component } from "solid-js";
+import { type Accessor, type Component, Show } from "solid-js";
 import { WordCloudChart } from "~/components/ui/charts";
 import type { threadMostUsedWordsQuery } from "~/db";
 

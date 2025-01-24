@@ -1,8 +1,8 @@
-import { Show, type Accessor, type Component } from "solid-js";
 import type { ChartData } from "chart.js";
+import { type Accessor, type Component, Show } from "solid-js";
 import { BarChart } from "~/components/ui/charts";
-import type { MessageStats, Recipients } from "~/types";
 import { hourNames } from "~/lib/messages";
+import type { MessageStats, Recipients } from "~/types";
 
 export const DmMessagesPerDaytime: Component<{
   daytimeStats: MessageStats["daytime"] | undefined;
