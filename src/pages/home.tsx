@@ -1,6 +1,7 @@
 import { createDropzone, createFileUploader } from "@solid-primitives/upload";
 import { Title } from "@solidjs/meta";
 import { type RouteSectionProps, useNavigate } from "@solidjs/router";
+import { Eye, EyeClosed } from "lucide-solid";
 import { type Component, type JSX, Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 import { Button } from "~/components/ui/button";
@@ -66,6 +67,8 @@ export const Home: Component<RouteSectionProps> = () => {
     }
   };
 
+  const [showPassphrase, setShowPassphrase] = createSignal(false);
+
   return (
     <>
       <Portal>
@@ -113,10 +116,17 @@ export const Home: Component<RouteSectionProps> = () => {
       </Portal>
       <Title>Signal stats</Title>
       <form class="mx-auto flex w-full flex-col gap-y-8 p-8 md:w-fit" onSubmit={onSubmit}>
-        <TextField onChange={(value) => setPassphrase(value)}>
-          <TextFieldLabel>Passphrase</TextFieldLabel>
-          <TextFieldInput type="password" class="w-full md:w-sm" />
-        </TextField>
+        <Flex flexDirection="row" class="w-full gap-x-2 md:w-sm" alignItems="end">
+          <TextField onChange={(value) => setPassphrase(value)} class="grow">
+            <TextFieldLabel>Passphrase</TextFieldLabel>
+            <TextFieldInput type={showPassphrase() ? "text" : "password"} />
+          </TextField>
+          <Button variant="ghost" onClick={() => setShowPassphrase((oldValue) => !oldValue)}>
+            <Show when={showPassphrase()} fallback={<EyeClosed />}>
+              <Eye />
+            </Show>
+          </Button>
+        </Flex>
         <Flex
           ref={dropzone.setRef}
           justifyContent="center"
