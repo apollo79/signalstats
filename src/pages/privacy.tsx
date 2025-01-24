@@ -80,7 +80,7 @@ export const Privacy: Component<RouteSectionProps> = () => {
         I run this website as an individual. If you have any questions or complaints regarding my privacy and data
         practices, you can reach out to the data controller:
       </p>
-      <p class="bg-info p-4">
+      <p class="bg-info p-4 text-info-foreground">
         duskflower
         <br />
         privacy(at)duskflower.dev
