@@ -16,7 +16,7 @@
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@tailwindcss/vite": "^4.0.0",
-    "@types/node": "^22.10.9",
+    "@types/node": "^22.10.10",
     "better-sqlite3": "^11.8.1",
     "husky": "^9.1.7",
     "kysely-codegen": "^0.17.0",
@@ -28,11 +28,11 @@
     "vite-plugin-wasm": "^3.4.1"
   },
   "dependencies": {
-    "@duskflower/signal-decrypt-backup-wasm": "^0.2.1",
+    "@duskflower/signal-decrypt-backup-wasm": "^0.3.0",
     "@kobalte/core": "^0.13.7",
     "@kobalte/tailwindcss": "^0.9.0",
     "@solid-primitives/refs": "^1.1.0",
-    "@solid-primitives/storage": "^4.3.0",
+    "@solid-primitives/storage": "^4.3.1",
     "@solid-primitives/upload": "^0.1.0",
     "@solid-primitives/workers": "^0.4.0",
     "@solidjs/meta": "^0.29.4",

@@ -1,7 +1,4 @@
-import {
-  BackupDecryptor,
-  type DecryptionResult,
-} from "@duskflower/signal-decrypt-backup-wasm";
+import { BackupDecryptor } from "@duskflower/signal-decrypt-backup-wasm";
 
 const CHUNK_SIZE = 1024 * 1024 * 40; // 40MB chunks
 
@@ -9,7 +6,8 @@ export async function decryptBackup(
   file: File,
   passphrase: string,
   progressCallback: (progress: number) => void,
-): Promise<DecryptionResult> {
+  statementsCallback?: (statements: string[]) => void | Promise<void>,
+): Promise<string[]> {
   const fileSize = file.size;
   const decryptor = new BackupDecryptor();
   decryptor.set_progress_callback(fileSize, progressCallback);
@@ -33,6 +31,8 @@ export async function decryptBackup(
           throw e;
         }
       }
+
+      await statementsCallback?.(decryptor.get_new_decrypted_statements());
 
       offset += CHUNK_SIZE;
     }

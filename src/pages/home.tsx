@@ -7,7 +7,7 @@ import { Flex } from "~/components/ui/flex";
 
 import { Progress, ProgressLabel, ProgressValueLabel } from "~/components/ui/progress";
 import { loadDb } from "~/db";
-import { decryptBackup } from "~/lib/decryptor";
+import { decryptBackup } from "~/lib/backup-decryptor";
 import { createDropzone, createFileUploader } from "@solid-primitives/upload";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
@@ -53,19 +53,23 @@ export const Home: Component<RouteSectionProps> = () => {
 
       // setDbHash(hash);
 
-      decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress)
-        .then(async (decrypted) => {
+      console.time();
+      decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress, async (statements) => {
+        await loadDb(statements);
+      })
+        .then(() => {
           umami.track("Decrypt backup");
           setDecryptionProgress(undefined);
           // setIsLoadingDatabase(true);
-          setLoadingProgress(0);
+          // setLoadingProgress(0);
 
-          await loadDb(decrypted.database_statements, setLoadingProgress);
+          // await loadDb(decrypted.database_statements, setLoadingProgress);
           umami.track("Load database");
 
           // setIsLoadingDatabase(false);
-          setLoadingProgress(undefined);
+          // setLoadingProgress(undefined);
 
+          console.timeEnd();
           navigate("/overview");
         })
         .catch((error) => {
