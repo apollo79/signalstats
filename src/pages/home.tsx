@@ -1,16 +1,14 @@
-import { useNavigate, type RouteSectionProps } from "@solidjs/router";
-import { createSignal, type JSX, Show, type Component } from "solid-js";
-
+import { createDropzone, createFileUploader } from "@solid-primitives/upload";
 import { Title } from "@solidjs/meta";
+import { type RouteSectionProps, useNavigate } from "@solidjs/router";
+import { type Component, type JSX, Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
+import { Button } from "~/components/ui/button";
 import { Flex } from "~/components/ui/flex";
-
 import { Progress, ProgressLabel, ProgressValueLabel } from "~/components/ui/progress";
+import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { loadDb } from "~/db";
 import { decryptBackup } from "~/lib/backup-decryptor";
-import { createDropzone, createFileUploader } from "@solid-primitives/upload";
-import { Button } from "~/components/ui/button";
-import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
 export const Home: Component<RouteSectionProps> = () => {
   const navigate = useNavigate();
@@ -34,8 +32,8 @@ export const Home: Component<RouteSectionProps> = () => {
   const [backupFile, setBackupFile] = createSignal<File>();
 
   const [decryptionProgress, setDecryptionProgress] = createSignal<number>();
-  const [loadingProgress, setLoadingProgress] = createSignal<number>();
-  // const [isLoadingDatabase, setIsLoadingDatabase] = createSignal(false);
+  const [totalStatements, setTotalStatements] = createSignal(0);
+  const [executedStatements, setExecutedStatements] = createSignal(0);
 
   const onSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = (event) => {
     event.preventDefault();
@@ -44,30 +42,20 @@ export const Home: Component<RouteSectionProps> = () => {
     const currentPassphrase = passphrase();
 
     if (currentBackupFile && currentPassphrase) {
-      // const hashChunk = await currentBackupFile.slice(-1000).text();
-      // const hash = hashString(hashChunk);
-
-      // if (hash === dbHash()) {
-      //   return;
-      // }
-
-      // setDbHash(hash);
-
       console.time();
       decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress, async (statements) => {
-        await loadDb(statements);
+        const length = statements.length;
+        setTotalStatements((oldValue) => oldValue + length);
+
+        await loadDb(statements, (progress) => {
+          setExecutedStatements((oldValue) => Math.round(oldValue + (progress / 100) * length));
+        });
+
+        setExecutedStatements((oldValue) => oldValue + length);
       })
         .then(() => {
           umami.track("Decrypt backup");
-          setDecryptionProgress(undefined);
-          // setIsLoadingDatabase(true);
-          // setLoadingProgress(0);
-
-          // await loadDb(decrypted.database_statements, setLoadingProgress);
           umami.track("Load database");
-
-          // setIsLoadingDatabase(false);
-          // setLoadingProgress(undefined);
 
           console.timeEnd();
           navigate("/overview");
@@ -88,7 +76,7 @@ export const Home: Component<RouteSectionProps> = () => {
           class="fixed inset-0 gap-y-8 backdrop-blur-lg backdrop-filter"
           classList={{
             // hidden: decryptionProgress() === undefined && !isLoadingDatabase(),
-            hidden: decryptionProgress() === undefined && loadingProgress() === undefined,
+            hidden: decryptionProgress() === undefined && totalStatements() === 0,
           }}
         >
           <Show when={decryptionProgress() !== undefined}>
@@ -101,20 +89,18 @@ export const Home: Component<RouteSectionProps> = () => {
               class="w-[300px] space-y-1"
             >
               <div class="flex justify-between">
-                <ProgressLabel>Processing...</ProgressLabel>
+                <ProgressLabel>Decrypting...</ProgressLabel>
                 <ProgressValueLabel />
               </div>
             </Progress>
           </Show>
-          <Show when={loadingProgress() !== undefined}>
-            {/* <p class="font-bold text-2xl">Loading database</p>
-            <p class="text-muted-foreground">This can take some time</p> */}
+          <Show when={totalStatements() !== 0}>
             <p class="font-bold text-2xl">Loading database</p>
             <Progress
-              value={loadingProgress()}
+              value={executedStatements()}
               minValue={0}
-              maxValue={100}
-              getValueLabel={({ value }) => `${value}%`}
+              maxValue={totalStatements()}
+              getValueLabel={({ value, max }) => `${value} of ${max}`}
               class="w-[300px] space-y-1"
             >
               <div class="flex justify-between">
