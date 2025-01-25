@@ -48,12 +48,13 @@ export const Home: Component<RouteSectionProps> = () => {
       decryptBackup(currentBackupFile, currentPassphrase, setDecryptionProgress, async (statements) => {
         const length = statements.length;
         setTotalStatements((oldValue) => oldValue + length);
+        const prevExecutedStatements = executedStatements();
 
         await loadDb(statements, (progress) => {
-          setExecutedStatements((oldValue) => Math.round(oldValue + (progress / 100) * length));
+          setExecutedStatements(Math.round(prevExecutedStatements + (progress / 100) * length));
         });
 
-        setExecutedStatements((oldValue) => oldValue + length);
+        setExecutedStatements(prevExecutedStatements + length);
       })
         .then(() => {
           umami.track("Decrypt backup");

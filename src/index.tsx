@@ -9,8 +9,8 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-// polyfill umami track function for development
-if (import.meta.env.DEV && !("umami" in window)) {
+// polyfill umami track function for cases where it may not be able to get loaded and development
+if (!("umami" in window)) {
   // @ts-ignore
   window.umami = {
     // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
